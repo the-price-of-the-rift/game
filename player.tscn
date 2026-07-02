@@ -1,10 +1,13 @@
 [gd_scene format=3 uid="uid://c7tsmp2n8i5nr"]
 
 [ext_resource type="Texture2D" uid="uid://7jwof0nqem27" path="res://assets/player_sheriff_sprite.png" id="1_4flbx"]
+[ext_resource type="Script" uid="uid://dft2jx2u72thl" path="res://scripts/Player.cs" id="1_i3pqv"]
+[ext_resource type="Script" uid="uid://b0oi136ds0qja" path="res://scripts/Player/PlayerStats.cs" id="2_stats"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_edjgo"]
 
 [node name="Player" type="CharacterBody2D" unique_id=1438655534]
+script = ExtResource("1_i3pqv")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=330197866]
 shape = SubResource("RectangleShape2D_edjgo")
@@ -13,3 +16,6 @@ shape = SubResource("RectangleShape2D_edjgo")
 position = Vector2(0, -20)
 texture = ExtResource("1_4flbx")
 hframes = 4
+
+[node name="PlayerStats" type="Node" parent="." unique_id=1797630924]
+script = ExtResource("2_stats")

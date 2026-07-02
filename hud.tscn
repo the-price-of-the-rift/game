@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://ceex5gt16krhb"]
+
+[ext_resource type="Script" uid="uid://dco3jp6st23n6" path="res://scripts/UI/Hud.cs" id="1_64ctp"]
+[ext_resource type="Texture2D" uid="uid://u7iu6dm0l2jp" path="res://assets/GUI/tinyRPG_manaSoulGUI_v_1_0/20250421barB-Sheet.png" id="2_8sq4i"]
+[ext_resource type="Texture2D" uid="uid://vyaopysakals" path="res://assets/GUI/xpBarFilled.png" id="3_8sq4i"]
+[ext_resource type="FontFile" uid="uid://cxquq4crex6ed" path="res://assets/GUI/LazyFox Pixel Font 1/LazyFox Pixel Font 1.ttf" id="4_640wx"]
+
+[node name="Hud" type="CanvasLayer" unique_id=827289445]
+script = ExtResource("1_64ctp")
+
+[node name="XpBarFrame" type="TextureProgressBar" parent="." unique_id=876770980]
+custom_minimum_size = Vector2(95, 15)
+offset_left = 29.0
+offset_top = 37.0
+offset_right = 125.0
+offset_bottom = 52.0
+max_value = 25.0
+value = 10.0
+texture_over = ExtResource("2_8sq4i")
+
+[node name="XpBarFilled" type="TextureProgressBar" parent="XpBarFrame" unique_id=1544181024]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 5.0
+offset_right = 87.0
+offset_bottom = 9.0
+max_value = 25.0
+nine_patch_stretch = true
+texture_progress = ExtResource("3_8sq4i")
+
+[node name="XpLevelLabel" type="Label" parent="." unique_id=1197151437]
+offset_left = 3.0
+offset_top = 38.0
+offset_right = 18.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.9764706, 0.83137256, 0.18431373, 1)
+theme_override_fonts/font = ExtResource("4_640wx")
+theme_override_font_sizes/font_size = 11
+text = "Lvl 1"
+horizontal_alignment = 2
+vertical_alignment = 1
