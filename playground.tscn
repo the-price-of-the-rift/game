@@ -1,10 +1,12 @@
 [gd_scene format=4 uid="uid://d0rh5tqq0x3ad"]
 
+[ext_resource type="Script" uid="uid://6jbx558qavgo" path="res://playground.gd" id="1_4bqqs"]
 [ext_resource type="PackedScene" uid="uid://c7tsmp2n8i5nr" path="res://player.tscn" id="1_rupst"]
 [ext_resource type="Texture2D" uid="uid://yadxg4eqrd1a" path="res://assets/grass_and_road_tile.png" id="2_o00ia"]
-[ext_resource type="Script" uid="uid://dft2jx2u72thl" path="res://scripts/Player.cs" id="2_wt17y"]
 [ext_resource type="Texture2D" uid="uid://q1xebu4dtu6c" path="res://assets/road_tile.png" id="3_4bqqs"]
 [ext_resource type="Texture2D" uid="uid://dj6iekrvneq3h" path="res://assets/grass_tile.png" id="3_m8u5f"]
+[ext_resource type="PackedScene" uid="uid://ceex5gt16krhb" path="res://hud.tscn" id="7_v7dth"]
+[ext_resource type="Script" uid="uid://co4jxnk5s6gvv" path="res://scripts/Debug/DebugXpGranter.cs" id="7_ynsuh"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_is3ju"]
 resource_name = "grass_tile"
@@ -25,6 +27,7 @@ sources/1 = SubResource("TileSetAtlasSource_ynsuh")
 sources/2 = SubResource("TileSetAtlasSource_v7dth")
 
 [node name="Playground" type="Node2D" unique_id=1653806137]
+script = ExtResource("1_4bqqs")
 
 [node name="Map" type="Node2D" parent="." unique_id=1194620530]
 
@@ -35,4 +38,23 @@ tile_set = SubResource("TileSet_o00ia")
 
 [node name="Player" parent="." unique_id=1438655534 instance=ExtResource("1_rupst")]
 position = Vector2(213, 130)
-script = ExtResource("2_wt17y")
+
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Player" unique_id=586136810]
+remote_path = NodePath("../../Camera2D")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1856277322]
+position = Vector2(213, 130)
+limit_left = 0
+limit_top = 0
+position_smoothing_speed = 15.0
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
+drag_left_margin = 0.05
+drag_top_margin = 0.05
+drag_right_margin = 0.05
+drag_bottom_margin = 0.05
+
+[node name="Hud" parent="." unique_id=827289445 instance=ExtResource("7_v7dth")]
+
+[node name="DebugXpGranter" type="Node" parent="." unique_id=1370781006]
+script = ExtResource("7_ynsuh")
