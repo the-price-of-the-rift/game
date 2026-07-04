@@ -1,0 +1,348 @@
+[gd_scene format=3 uid="uid://dwxhbehfhsxyh"]
+
+[ext_resource type="Script" uid="uid://x7g30imgc23t" path="res://scripts/ui/AbilityTreeUI.cs" id="1"]
+[ext_resource type="Script" uid="uid://bmv4k7dcsf7lw" path="res://scripts/ui/AbilityNodeButton.cs" id="2"]
+
+[node name="AbilityTree" type="CanvasLayer" unique_id=1593244181]
+script = ExtResource("1")
+InfoLabelPath = NodePath("Panel/InfoLabel")
+NodesRootPath = NodePath("Panel/NodesRoot")
+
+[node name="Backdrop" type="ColorRect" parent="." unique_id=625352717]
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 1
+color = Color(0.02, 0.02, 0.04, 0.82)
+
+[node name="Panel" type="Panel" parent="." unique_id=1451235155]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 632.0
+offset_bottom = 352.0
+
+[node name="Title" type="Label" parent="Panel" unique_id=1640336829]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 180.0
+offset_bottom = 24.0
+theme_override_font_sizes/font_size = 12
+text = "Rift Ability Tree"
+
+[node name="SubTitle" type="Label" parent="Panel" unique_id=1984876085]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 27.0
+offset_right = 612.0
+offset_bottom = 41.0
+theme_override_font_sizes/font_size = 9
+text = "Hover for details."
+
+[node name="InfoLabel" type="Label" parent="Panel" unique_id=1412812712]
+layout_mode = 0
+offset_left = 118.0
+offset_top = 2.0
+offset_right = 718.0
+offset_bottom = 26.0
+theme_override_font_sizes/font_size = 9
+autowrap_mode = 3
+
+[node name="NodesRoot" type="Control" parent="Panel" unique_id=432361330]
+anchors_preset = 0
+offset_left = 11.0
+offset_top = 43.0
+offset_right = 611.0
+offset_bottom = 307.0
+
+[node name="ActiveTitle" type="Label" parent="Panel/NodesRoot" unique_id=543777087]
+layout_mode = 0
+offset_left = 210.0
+offset_right = 390.0
+offset_bottom = 14.0
+theme_override_font_sizes/font_size = 9
+text = "ACTIVE SKILLS"
+horizontal_alignment = 1
+
+[node name="heavy_cut" type="Button" parent="Panel/NodesRoot" unique_id=117044744]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 14.0
+offset_right = 166.0
+offset_bottom = 40.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "heavy_cut"
+
+[node name="quick_fire" type="Button" parent="Panel/NodesRoot" unique_id=1603445130]
+layout_mode = 0
+offset_left = 296.0
+offset_top = 14.0
+offset_right = 370.0
+offset_bottom = 40.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "quick_fire"
+
+[node name="dash_hit" type="Button" parent="Panel/NodesRoot" unique_id=232449070]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 14.0
+offset_right = 574.0
+offset_bottom = 40.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "dash_hit"
+
+[node name="slash" type="Button" parent="Panel/NodesRoot" unique_id=560687760]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 40.0
+offset_right = 84.0
+offset_bottom = 66.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "slash"
+
+[node name="multi_arrow" type="Button" parent="Panel/NodesRoot" unique_id=781553777]
+layout_mode = 0
+offset_left = 214.0
+offset_top = 40.0
+offset_right = 288.0
+offset_bottom = 66.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "multi_arrow"
+
+[node name="dart_wave" type="Button" parent="Panel/NodesRoot" unique_id=992162229]
+layout_mode = 0
+offset_left = 418.0
+offset_top = 40.0
+offset_right = 492.0
+offset_bottom = 66.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "dart_wave"
+
+[node name="devastating_cut" type="Button" parent="Panel/NodesRoot" unique_id=1582886545]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 66.0
+offset_right = 166.0
+offset_bottom = 92.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "devastating_cut"
+
+[node name="critical_fire" type="Button" parent="Panel/NodesRoot" unique_id=1060426021]
+layout_mode = 0
+offset_left = 296.0
+offset_top = 66.0
+offset_right = 370.0
+offset_bottom = 92.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "critical_fire"
+
+[node name="enemy_crash" type="Button" parent="Panel/NodesRoot" unique_id=1120685489]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 66.0
+offset_right = 574.0
+offset_bottom = 92.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "enemy_crash"
+
+[node name="PassiveTitle" type="Label" parent="Panel/NodesRoot" unique_id=1273089870]
+layout_mode = 0
+offset_left = 206.0
+offset_top = 98.0
+offset_right = 394.0
+offset_bottom = 112.0
+theme_override_font_sizes/font_size = 9
+text = "PASSIVE SKILLS"
+horizontal_alignment = 1
+
+[node name="kings_grace" type="Button" parent="Panel/NodesRoot" unique_id=1616108485]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 116.0
+offset_right = 345.0
+offset_bottom = 142.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "kings_grace"
+
+[node name="kings_blessing" type="Button" parent="Panel/NodesRoot" unique_id=1172554313]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 148.0
+offset_right = 182.0
+offset_bottom = 174.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "kings_blessing"
+
+[node name="kings_courtesy" type="Button" parent="Panel/NodesRoot" unique_id=561274666]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 148.0
+offset_right = 345.0
+offset_bottom = 174.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "kings_courtesy"
+
+[node name="kings_pardon" type="Button" parent="Panel/NodesRoot" unique_id=136622754]
+layout_mode = 0
+offset_left = 418.0
+offset_top = 148.0
+offset_right = 508.0
+offset_bottom = 174.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "kings_pardon"
+
+[node name="strikes_of_justice" type="Button" parent="Panel/NodesRoot" unique_id=167350318]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 180.0
+offset_right = 345.0
+offset_bottom = 206.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "strikes_of_justice"
+
+[node name="Level2Gate" type="Label" parent="Panel/NodesRoot" unique_id=38736204]
+layout_mode = 0
+offset_left = 486.0
+offset_top = 182.0
+offset_right = 594.0
+offset_bottom = 206.0
+theme_override_font_sizes/font_size = 8
+text = "Gate L2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="strikes_of_judgement" type="Button" parent="Panel/NodesRoot" unique_id=135796805]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 212.0
+offset_right = 182.0
+offset_bottom = 238.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "strikes_of_judgement"
+
+[node name="arrows_of_vengeance" type="Button" parent="Panel/NodesRoot" unique_id=2000418003]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 212.0
+offset_right = 345.0
+offset_bottom = 238.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "arrows_of_vengeance"
+
+[node name="payment_time" type="Button" parent="Panel/NodesRoot" unique_id=2020267882]
+layout_mode = 0
+offset_left = 418.0
+offset_top = 212.0
+offset_right = 508.0
+offset_bottom = 238.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "payment_time"
+
+[node name="royal_order" type="Button" parent="Panel/NodesRoot" unique_id=578029743]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 244.0
+offset_right = 345.0
+offset_bottom = 270.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "royal_order"
+
+[node name="Level3Gate" type="Label" parent="Panel/NodesRoot" unique_id=1014478074]
+layout_mode = 0
+offset_left = 486.0
+offset_top = 246.0
+offset_right = 594.0
+offset_bottom = 270.0
+theme_override_font_sizes/font_size = 8
+text = "Gate L3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="noble_directive" type="Button" parent="Panel/NodesRoot" unique_id=2051027076]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 276.0
+offset_right = 182.0
+offset_bottom = 302.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "noble_directive"
+
+[node name="majestic_advice" type="Button" parent="Panel/NodesRoot" unique_id=1337852086]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 276.0
+offset_right = 345.0
+offset_bottom = 302.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "majestic_advice"
+
+[node name="alchemic_assistance" type="Button" parent="Panel/NodesRoot" unique_id=405028136]
+layout_mode = 0
+offset_left = 418.0
+offset_top = 276.0
+offset_right = 508.0
+offset_bottom = 302.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
+script = ExtResource("2")
+AbilityId = "alchemic_assistance"

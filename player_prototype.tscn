@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://c8holynkwfdr0"]
+
+[ext_resource type="Texture2D" uid="uid://7jwof0nqem27" path="res://assets/player_sheriff_sprite.png" id="1"]
+[ext_resource type="Script" uid="uid://dkp17m5xa4xu0" path="res://scripts/actors/PlayerPrototype.cs" id="2"]
+[ext_resource type="Script" uid="uid://c7v08jkjocyaq" path="res://scripts/Weapon.cs" id="3"]
+[ext_resource type="PackedScene" path="res://projectile.tscn" id="4"]
+
+[sub_resource type="CircleShape2D" id="1"]
+radius = 12.0
+
+[node name="Player" type="CharacterBody2D" unique_id=1374499228]
+script = ExtResource("2")
+SpritePath = NodePath("Sprite2D")
+WeaponPath = NodePath("WeaponPivot/Weapon")
+ProjectileOriginPath = NodePath("WeaponPivot/ProjectileOrigin")
+ProjectileScene = ExtResource("4")
+collision_layer = 1
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1859302192]
+shape = SubResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2058894776]
+z_index = 15
+z_as_relative = false
+position = Vector2(0, -20)
+texture = ExtResource("1")
+hframes = 4
+
+[node name="WeaponPivot" type="Node2D" parent="." unique_id=1414289016]
+z_index = 19
+position = Vector2(0, -8)
+
+[node name="Weapon" type="Node2D" parent="WeaponPivot" unique_id=20672597]
+script = ExtResource("3")
+WarriorVisualPath = NodePath("WarriorVisual")
+RangerVisualPath = NodePath("RangerVisual")
+ScoutVisualPath = NodePath("ScoutVisual")
+
+[node name="WarriorVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=603526110]
+
+[node name="Blade" type="Polygon2D" parent="WeaponPivot/Weapon/WarriorVisual" unique_id=100115883]
+color = Color(0.9, 0.9, 0.95, 1)
+polygon = PackedVector2Array(2, -3, 24, -2, 24, 2, 2, 3)
+
+[node name="Guard" type="Polygon2D" parent="WeaponPivot/Weapon/WarriorVisual" unique_id=1991987008]
+color = Color(0.63, 0.4, 0.18, 1)
+polygon = PackedVector2Array(0, -5, 5, -5, 5, 5, 0, 5)
+
+[node name="RangerVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=1618065905]
+visible = false
+
+[node name="BowArc" type="Polygon2D" parent="WeaponPivot/Weapon/RangerVisual" unique_id=294245551]
+color = Color(0.72, 0.56, 0.22, 1)
+polygon = PackedVector2Array(-3, -12, 1, -10, 5, -4, 6, 0, 5, 4, 1, 10, -3, 12, -1, 0)
+
+[node name="BowString" type="Line2D" parent="WeaponPivot/Weapon/RangerVisual" unique_id=1787947516]
+points = PackedVector2Array(-2, -10, -5, 0, -2, 10)
+width = 1.5
+default_color = Color(0.95, 0.95, 0.9, 1)
+
+[node name="ScoutVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=474282051]
+visible = false
+
+[node name="Dagger" type="Polygon2D" parent="WeaponPivot/Weapon/ScoutVisual" unique_id=2094698287]
+color = Color(0.82, 0.86, 0.9, 1)
+polygon = PackedVector2Array(1, -2, 18, -1, 22, 0, 18, 1, 1, 2)
+
+[node name="Handle" type="Polygon2D" parent="WeaponPivot/Weapon/ScoutVisual" unique_id=1448717357]
+color = Color(0.36, 0.24, 0.12, 1)
+polygon = PackedVector2Array(-4, -3, 3, -3, 3, 3, -4, 3)
+
+[node name="ProjectileOrigin" type="Marker2D" parent="WeaponPivot" unique_id=317644661]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=613074479]
+position = Vector2(0, -10)
