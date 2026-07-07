@@ -1,19 +1,25 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://0hhhi0k5o3mg"]
 
-[ext_resource type="Script" path="res://scripts/actors/Projectile.cs" id="1"]
+[ext_resource type="Script" uid="uid://ty361ibe3rq1" path="res://scripts/actors/Projectile.cs" id="1"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 4.0
 
-[node name="Projectile" type="Area2D"]
-script = ExtResource("1")
-VisualPath = NodePath("Visual")
+[node name="Projectile" type="Area2D" unique_id=532405685]
 collision_layer = 1
 collision_mask = 3
+script = ExtResource("1")
+VisualPath = NodePath("Visual")
+ShapeCastPath = NodePath("ShapeCast2D")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=300851167]
 shape = SubResource("1")
 
-[node name="Visual" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(0, -5, 7, 0, 0, 5, -7, 0)
+[node name="ShapeCast2D" type="ShapeCast2D" parent="." unique_id=812643058]
+enabled = true
+exclude_parent = true
+shape = SubResource("1")
+
+[node name="Visual" type="Polygon2D" parent="." unique_id=1745496387]
 color = Color(0.95, 0.8, 0.2, 1)
+polygon = PackedVector2Array(0, -5, 7, 0, 0, 5, -7, 0)

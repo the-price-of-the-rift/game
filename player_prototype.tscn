@@ -3,19 +3,18 @@
 [ext_resource type="Texture2D" uid="uid://7jwof0nqem27" path="res://assets/player_sheriff_sprite.png" id="1"]
 [ext_resource type="Script" uid="uid://dkp17m5xa4xu0" path="res://scripts/actors/PlayerPrototype.cs" id="2"]
 [ext_resource type="Script" uid="uid://c7v08jkjocyaq" path="res://scripts/Weapon.cs" id="3"]
-[ext_resource type="PackedScene" path="res://projectile.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://0hhhi0k5o3mg" path="res://projectile.tscn" id="4"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 12.0
 
 [node name="Player" type="CharacterBody2D" unique_id=1374499228]
+collision_layer = 2
 script = ExtResource("2")
 SpritePath = NodePath("Sprite2D")
 WeaponPath = NodePath("WeaponPivot/Weapon")
 ProjectileOriginPath = NodePath("WeaponPivot/ProjectileOrigin")
 ProjectileScene = ExtResource("4")
-collision_layer = 1
-collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1859302192]
 shape = SubResource("1")
@@ -38,6 +37,7 @@ RangerVisualPath = NodePath("RangerVisual")
 ScoutVisualPath = NodePath("ScoutVisual")
 
 [node name="WarriorVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=603526110]
+position = Vector2(5, 0)
 
 [node name="Blade" type="Polygon2D" parent="WeaponPivot/Weapon/WarriorVisual" unique_id=100115883]
 color = Color(0.9, 0.9, 0.95, 1)
@@ -49,6 +49,7 @@ polygon = PackedVector2Array(0, -5, 5, -5, 5, 5, 0, 5)
 
 [node name="RangerVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=1618065905]
 visible = false
+position = Vector2(6, -4)
 
 [node name="BowArc" type="Polygon2D" parent="WeaponPivot/Weapon/RangerVisual" unique_id=294245551]
 color = Color(0.72, 0.56, 0.22, 1)
@@ -61,6 +62,7 @@ default_color = Color(0.95, 0.95, 0.9, 1)
 
 [node name="ScoutVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=474282051]
 visible = false
+position = Vector2(9, -4)
 
 [node name="Dagger" type="Polygon2D" parent="WeaponPivot/Weapon/ScoutVisual" unique_id=2094698287]
 color = Color(0.82, 0.86, 0.9, 1)

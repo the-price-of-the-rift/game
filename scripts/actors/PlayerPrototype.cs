@@ -29,7 +29,12 @@ public partial class PlayerPrototype : CharacterBody2D
 
 	private const float BaseMeleeDamage = 12.0f;
 	private const float BaseRangedDamage = 10.0f;
-	private const float BaseMoveSpeed = 108.0f;
+	private const float RangerBaseHealth = 50.0f;
+	private const float WarriorHealthBonus = 20.0f;
+	private const float ScoutHealthPenalty = 10.0f;
+	private const float RangerBaseMoveSpeed = 108.0f;
+	private const float WarriorMovePenalty = 18.0f;
+	private const float ScoutMoveBonus = 22.0f;
 	private const float BaseCritChance = 0.08f;
 	private const float BaseCritMultiplier = 1.6f;
 	private const float ShieldRechargeDelay = 3.0f;
@@ -60,7 +65,6 @@ public partial class PlayerPrototype : CharacterBody2D
 	private float dashTimer = 0.0f;
 	private float dashDamage = 0.0f;
 	private Vector2 dashDirection = Vector2.Zero;
-	private bool wasDashing = false;
 
 	public override void _Ready()
 	{
@@ -326,14 +330,13 @@ public partial class PlayerPrototype : CharacterBody2D
 		{
 			BuildBranch.Warrior => new[] { "Slash", "Heavy Cut", "Devastating Cut" },
 			BuildBranch.Ranger => new[] { "Multi-Arrow", "Quick Fire", "Critical Fire" },
-			BuildBranch.Scout => new[] { "Dart Wave", "Dash Hit", "Enemy Crash" },
+			BuildBranch.Scout => new[] { "Dash Hit", "Dart Wave", "Enemy Crash" },
 			_ => new[] { "Unlock a branch in the tree" },
 		};
 	}
 
 	private void TickTimers(float delta)
 	{
-		wasDashing = dashTimer > 0.0f;
 		attackTimer -= delta;
 		shieldRechargeTimer = Mathf.Max(0.0f, shieldRechargeTimer - delta);
 		quickFireTimer = Mathf.Max(0.0f, quickFireTimer - delta);
@@ -341,10 +344,6 @@ public partial class PlayerPrototype : CharacterBody2D
 		enemyCrashTimer = Mathf.Max(0.0f, enemyCrashTimer - delta);
 		invulnerabilityTimer = Mathf.Max(0.0f, invulnerabilityTimer - delta);
 		dashTimer = Mathf.Max(0.0f, dashTimer - delta);
-		if (wasDashing && dashTimer <= 0.0f)
-		{
-			SetCollisionMaskValue(2, true);
-		}
 
 		List<string> keys = new(cooldowns.Keys);
 		foreach (string key in keys)
@@ -433,7 +432,7 @@ public partial class PlayerPrototype : CharacterBody2D
 				break;
 			case BuildBranch.Scout:
 				bool closeHit = TryMeleeArc(direction, 34.0f, 0.72f, GetMeleeDamage(true) * 0.65f);
-				SpawnProjectile(direction, GetRangedDamage(false) * 0.8f, 280.0f, 1.2f, false, HasAbility("alchemic_assistance"), new Color(0.48f, 0.88f, 0.7f));
+				SpawnProjectile(direction, 0.0f, 280.0f, 1.2f, false, false, new Color(0.48f, 0.88f, 0.7f), true);
 				if (closeHit)
 				{
 					weapon?.FlashHit();
@@ -537,8 +536,8 @@ public partial class PlayerPrototype : CharacterBody2D
 	{
 		return slot switch
 		{
-			0 => ConsumeCooldown("dart_wave", 5.0f) && UseDartWave(direction),
-			1 => ConsumeCooldown("dash_hit", 6.0f) && UseDashHit(direction, false),
+			0 => ConsumeCooldown("dash_hit", 6.0f) && UseDashHit(direction, false),
+			1 => ConsumeCooldown("dart_wave", 5.0f) && UseDartWave(direction),
 			2 => ConsumeCooldown("enemy_crash", 9.0f) && UseDashHit(direction, true),
 			_ => false,
 		};
@@ -595,7 +594,7 @@ public partial class PlayerPrototype : CharacterBody2D
 		{
 			for (int index = -1; index <= 1; index++)
 			{
-				Projectile projectile = SpawnProjectile(direction.Rotated(index * 0.22f), GetRangedDamage(false) * 0.85f, 300.0f - burst * 20.0f, 1.5f + burst * 0.15f, false, HasAbility("alchemic_assistance"), new Color(0.38f, 0.9f, 0.68f));
+				Projectile projectile = SpawnProjectile(direction.Rotated(index * 0.22f), 0.0f, 300.0f - burst * 20.0f, 1.5f + burst * 0.15f, false, false, new Color(0.38f, 0.9f, 0.68f), true);
 				projectile.GlobalPosition += direction * burst * 5.0f;
 			}
 		}
@@ -627,7 +626,6 @@ public partial class PlayerPrototype : CharacterBody2D
 		dashTimer = DashDuration;
 		invulnerabilityTimer = Mathf.Max(invulnerabilityTimer, DashDuration + 0.05f);
 		dashHitEnemies.Clear();
-		SetCollisionMaskValue(2, false);
 		ApplyDashDamage();
 	}
 
@@ -635,7 +633,6 @@ public partial class PlayerPrototype : CharacterBody2D
 	{
 		if (dashTimer <= 0.0f)
 		{
-			SetCollisionMaskValue(2, true);
 			return;
 		}
 
@@ -698,7 +695,7 @@ public partial class PlayerPrototype : CharacterBody2D
 		return hitSomething;
 	}
 
-	private Projectile SpawnProjectile(Vector2 direction, float damage, float speed, float lifetime, bool pierce, bool poison, Color color)
+	private Projectile SpawnProjectile(Vector2 direction, float damage, float speed, float lifetime, bool pierce, bool poison, Color color, bool scoutDebuff = false)
 	{
 		Projectile projectile = ProjectileScene.Instantiate<Projectile>();
 		projectile.FromPlayer = true;
@@ -708,6 +705,11 @@ public partial class PlayerPrototype : CharacterBody2D
 		projectile.Lifetime = lifetime;
 		projectile.CanPierce = pierce;
 		projectile.AppliesPoison = poison;
+		projectile.AppliesScoutDebuff = scoutDebuff;
+		projectile.ScoutSlowMultiplier = 0.6f;
+		projectile.ScoutPoisonTickDamage = HasAbility("alchemic_assistance") ? 2.0f : 1.0f;
+		projectile.ScoutPoisonTickInterval = 4.0f;
+		projectile.ScoutDebuffDuration = HasAbility("alchemic_assistance") ? 10.0f : 8.0f;
 		projectile.Tint = color;
 		projectile.GlobalPosition = projectileOrigin != null ? projectileOrigin.GlobalPosition : GlobalPosition + direction * 18.0f;
 		projectileContainer?.AddChild(projectile);
@@ -716,18 +718,14 @@ public partial class PlayerPrototype : CharacterBody2D
 
 	private float GetMoveSpeed()
 	{
-		float value = BaseMoveSpeed;
+		float value = RangerBaseMoveSpeed;
 		if (ChosenBranch == BuildBranch.Warrior)
 		{
-			value -= 10.0f;
-		}
-		if (ChosenBranch == BuildBranch.Ranger)
-		{
-			value += 12.0f;
+			value -= WarriorMovePenalty;
 		}
 		if (ChosenBranch == BuildBranch.Scout)
 		{
-			value += 18.0f;
+			value += ScoutMoveBonus;
 		}
 		if (enemyCrashTimer > 0.0f)
 		{
@@ -824,6 +822,10 @@ public partial class PlayerPrototype : CharacterBody2D
 
 	private void RefreshStats()
 	{
+		float previousMaxHealth = maxHealth;
+		float previousMaxShield = maxShield;
+		float healthRatio = previousMaxHealth > 0.0f ? currentHealth / previousMaxHealth : 1.0f;
+		float shieldRatio = previousMaxShield > 0.0f ? currentShield / previousMaxShield : 1.0f;
 		float healthBonus = 0.0f;
 		if (Level >= 2)
 		{
@@ -834,7 +836,16 @@ public partial class PlayerPrototype : CharacterBody2D
 			healthBonus += 10.0f;
 		}
 
-		maxHealth = 50.0f + healthBonus;
+		maxHealth = RangerBaseHealth + healthBonus;
+		if (ChosenBranch == BuildBranch.Warrior)
+		{
+			maxHealth += WarriorHealthBonus;
+		}
+		else if (ChosenBranch == BuildBranch.Scout)
+		{
+			maxHealth -= ScoutHealthPenalty;
+		}
+
 		maxShield = 0.0f;
 
 		if (HasAbility("kings_grace"))
@@ -850,8 +861,8 @@ public partial class PlayerPrototype : CharacterBody2D
 			maxShield = 15.0f;
 		}
 
-		currentHealth = Mathf.Clamp(currentHealth, 0.0f, maxHealth);
-		currentShield = Mathf.Clamp(currentShield, 0.0f, maxShield);
+		currentHealth = Mathf.Clamp(maxHealth * healthRatio, 0.0f, maxHealth);
+		currentShield = Mathf.Clamp(maxShield * shieldRatio, 0.0f, maxShield);
 		if (maxShield > 0.0f && currentShield == 0.0f && shieldRechargeTimer <= 0.0f)
 		{
 			currentShield = maxShield;
@@ -899,8 +910,8 @@ public partial class PlayerPrototype : CharacterBody2D
 			},
 			BuildBranch.Scout => slot switch
 			{
-				0 => "dart_wave",
-				1 => "dash_hit",
+				0 => "dash_hit",
+				1 => "dart_wave",
 				_ => "enemy_crash",
 			},
 			_ => string.Empty,

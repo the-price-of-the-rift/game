@@ -252,7 +252,7 @@ public partial class Playground2Controller : Node2D
 
 		foreach (EnemyPrototype enemy in livingEnemies)
 		{
-			if (!IsInstanceValid(enemy) || !projectileEnemies.Contains(enemy))
+			if (!IsInstanceValid(enemy) || !projectileEnemies.Contains(enemy) || !enemy.CanUseRangedAttack())
 			{
 				continue;
 			}
@@ -267,6 +267,7 @@ public partial class Playground2Controller : Node2D
 			projectile.Direction = (player.GlobalPosition - origin).Normalized();
 			projectile.GlobalPosition = origin;
 			entitiesRoot.AddChild(projectile);
+			enemy.TriggerRangedAttack(projectileVolleyTimer);
 		}
 	}
 

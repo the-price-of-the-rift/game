@@ -89,10 +89,10 @@ AbilityId = "quick_fire"
 
 [node name="dash_hit" type="Button" parent="Panel/NodesRoot" unique_id=232449070]
 layout_mode = 0
-offset_left = 500.0
-offset_top = 14.0
-offset_right = 574.0
-offset_bottom = 40.0
+offset_left = 418.0
+offset_top = 40.0
+offset_right = 492.0
+offset_bottom = 66.0
 focus_mode = 0
 theme_override_font_sizes/font_size = 8
 autowrap_mode = 3
@@ -125,10 +125,10 @@ AbilityId = "multi_arrow"
 
 [node name="dart_wave" type="Button" parent="Panel/NodesRoot" unique_id=992162229]
 layout_mode = 0
-offset_left = 418.0
-offset_top = 40.0
-offset_right = 492.0
-offset_bottom = 66.0
+offset_left = 500.0
+offset_top = 14.0
+offset_right = 574.0
+offset_bottom = 40.0
 focus_mode = 0
 theme_override_font_sizes/font_size = 8
 autowrap_mode = 3

@@ -146,9 +146,9 @@ public static class AbilityDefinitions
 			Cost = 1,
 			Branch = BuildBranch.Scout,
 			Kind = AbilityKind.Active,
-			IsBranchChoice = true,
-			RequiredReputation = 10,
+			RequiredReputation = 20,
 			TreePosition = new Vector2(890, 120),
+			Prerequisites = ["dash_hit"],
 		},
 		["dash_hit"] = new AbilityDefinition
 		{
@@ -158,9 +158,9 @@ public static class AbilityDefinitions
 			Cost = 1,
 			Branch = BuildBranch.Scout,
 			Kind = AbilityKind.Active,
-			RequiredReputation = 20,
+			IsBranchChoice = true,
+			RequiredReputation = 10,
 			TreePosition = new Vector2(1075, 72),
-			Prerequisites = ["dart_wave"],
 		},
 		["enemy_crash"] = new AbilityDefinition
 		{
@@ -173,7 +173,7 @@ public static class AbilityDefinitions
 			RequiredLevel = 2,
 			RequiredReputation = 35,
 			TreePosition = new Vector2(1075, 182),
-			Prerequisites = ["dash_hit"],
+			Prerequisites = ["dart_wave"],
 		},
 		["kings_grace"] = new AbilityDefinition
 		{

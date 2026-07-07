@@ -16,13 +16,23 @@ public partial class EnemyPrototype : CharacterBody2D
 	public int RiftTier { get; private set; } = 1;
 	public bool IsElite { get; private set; } = false;
 	public bool IsDead => currentHealth <= 0.0f;
+	public bool IsScoutDebuffed => scoutDebuffTimer > 0.0f;
 
 	private float currentHealth;
+	private float baseMoveSpeed;
+	private float baseAttackCooldown;
 	private float attackTimer = 0.0f;
+	private float rangedAttackTimer = 0.0f;
 	private float poisonTimer = 0.0f;
 	private float poisonTicksLeft = 0.0f;
+	private float scoutDebuffTimer = 0.0f;
+	private float scoutPoisonTimer = 0.0f;
+	private float scoutPoisonTickDamage = 1.0f;
+	private float scoutPoisonTickInterval = 4.0f;
+	private float scoutSlowMultiplier = 0.6f;
 	private CanvasItem? visual;
 	private PlayerPrototype? player;
+	private Tween? hitTween;
 
 	public override void _Ready()
 	{
@@ -41,6 +51,8 @@ public partial class EnemyPrototype : CharacterBody2D
 		ContactDamage = 7.0f + (tier - 1) * 2.0f + (elite ? 4.0f : 0.0f);
 		MaxHealth = 28.0f + (tier - 1) * 12.0f + (elite ? 20.0f : 0.0f);
 		AttackCooldown = Mathf.Max(0.45f, 1.0f - tier * 0.04f);
+		baseMoveSpeed = MoveSpeed;
+		baseAttackCooldown = AttackCooldown;
 		currentHealth = MaxHealth;
 		Scale = elite ? new Vector2(1.2f, 1.2f) : Vector2.One;
 		UpdateColor();
@@ -66,18 +78,54 @@ public partial class EnemyPrototype : CharacterBody2D
 			}
 		}
 
+		if (scoutDebuffTimer > 0.0f)
+		{
+			scoutDebuffTimer -= (float)delta;
+			scoutPoisonTimer -= (float)delta;
+			if (scoutPoisonTimer <= 0.0f)
+			{
+				scoutPoisonTimer = scoutPoisonTickInterval;
+				TakeDamage(scoutPoisonTickDamage, false);
+			}
+		}
+
 		Vector2 toPlayer = player.GlobalPosition - GlobalPosition;
 		float distance = toPlayer.Length();
-		Velocity = distance > AttackRange ? toPlayer.Normalized() * MoveSpeed : Vector2.Zero;
+		Velocity = distance > AttackRange ? toPlayer.Normalized() * GetCurrentMoveSpeed() : Vector2.Zero;
 		MoveAndSlide();
 		Rotation = Velocity.Angle();
 
 		attackTimer -= (float)delta;
+		rangedAttackTimer -= (float)delta;
 		if (distance <= AttackRange + 2.0f && attackTimer <= 0.0f)
 		{
-			attackTimer = AttackCooldown;
+			attackTimer = GetCurrentAttackCooldown();
 			player.TakeDamage(ContactDamage);
 		}
+	}
+
+	public void ApplyScoutDebuff(float slowMultiplier, float poisonDamage, float poisonInterval, float duration)
+	{
+		if (IsDead)
+		{
+			return;
+		}
+
+		scoutSlowMultiplier = slowMultiplier;
+		scoutPoisonTickDamage = poisonDamage;
+		scoutPoisonTickInterval = poisonInterval;
+		scoutDebuffTimer = Mathf.Max(scoutDebuffTimer, duration);
+		scoutPoisonTimer = Mathf.Min(scoutPoisonTimer <= 0.0f ? poisonInterval : scoutPoisonTimer, poisonInterval);
+	}
+
+	public bool CanUseRangedAttack()
+	{
+		return !IsDead && rangedAttackTimer <= 0.0f;
+	}
+
+	public void TriggerRangedAttack(float baseCooldown)
+	{
+		rangedAttackTimer = baseCooldown * (IsScoutDebuffed ? 2.0f : 1.0f);
 	}
 
 	public void TakeDamage(float damage, bool applyPoison)
@@ -97,9 +145,23 @@ public partial class EnemyPrototype : CharacterBody2D
 		if (currentHealth <= 0.0f)
 		{
 			currentHealth = 0.0f;
+			hitTween?.Kill();
 			EmitSignal(SignalName.EnemyKilled, this);
 			QueueFree();
+			return;
 		}
+
+		PlayHitFlash();
+	}
+
+	private float GetCurrentMoveSpeed()
+	{
+		return IsScoutDebuffed ? baseMoveSpeed * scoutSlowMultiplier : baseMoveSpeed;
+	}
+
+	private float GetCurrentAttackCooldown()
+	{
+		return IsScoutDebuffed ? baseAttackCooldown * 2.0f : baseAttackCooldown;
 	}
 
 	private void UpdateColor()
@@ -110,5 +172,21 @@ public partial class EnemyPrototype : CharacterBody2D
 		}
 
 		visual.Modulate = IsElite ? new Color(0.8f, 0.22f, 0.18f) : new Color(0.9f, 0.4f, 0.28f);
+	}
+
+	private void PlayHitFlash()
+	{
+		if (visual == null)
+		{
+			return;
+		}
+
+		hitTween?.Kill();
+		Color baseColor = IsElite ? new Color(0.8f, 0.22f, 0.18f) : new Color(0.9f, 0.4f, 0.28f);
+		Color flashColor = new Color(0.3f, 0.72f, 1.0f);
+		visual.Modulate = baseColor;
+		hitTween = CreateTween();
+		hitTween.TweenProperty(visual, "modulate", flashColor, 0.18f);
+		hitTween.TweenProperty(visual, "modulate", baseColor, 0.62f);
 	}
 }
