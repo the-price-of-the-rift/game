@@ -4,3 +4,5 @@
 
 # Ignore all addons (avoid exposing tooling used for development)
 /addons/
+
+/.idea/
