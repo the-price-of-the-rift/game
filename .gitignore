@@ -6,3 +6,4 @@
 /addons/
 
 /.idea/
+*.local.*
