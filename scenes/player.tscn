@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://c8holynkwfdr0"]
 
 [ext_resource type="Texture2D" uid="uid://7jwof0nqem27" path="res://assets/player_sheriff_sprite.png" id="1"]
-[ext_resource type="Script" uid="uid://dkp17m5xa4xu0" path="res://scripts/actors/PlayerPrototype.cs" id="2"]
-[ext_resource type="Script" uid="uid://c7v08jkjocyaq" path="res://scripts/Weapon.cs" id="3"]
-[ext_resource type="PackedScene" uid="uid://0hhhi0k5o3mg" path="res://projectile.tscn" id="4"]
+[ext_resource type="Script" uid="uid://dkp17m5xa4xu0" path="res://scripts/actors/Player.cs" id="2"]
+[ext_resource type="Script" uid="uid://c7v08jkjocyaq" path="res://scripts/actors/Weapon.cs" id="3"]
+[ext_resource type="PackedScene" uid="uid://0hhhi0k5o3mg" path="res://scenes/projectile.tscn" id="4"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 12.0

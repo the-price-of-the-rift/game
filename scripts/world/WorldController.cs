@@ -3,7 +3,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class Playground2Controller : Node2D
+public partial class WorldController : Node2D
 {
 	[Export] public PackedScene EnemyScene { get; set; } = null!;
 	[Export] public PackedScene ProjectileScene { get; set; } = null!;
@@ -27,11 +27,11 @@ public partial class Playground2Controller : Node2D
 	[Export] public float ProjectileRatioPerTier { get; set; } = 0.15f;
 	[Export] public float AcidRatioPerTier { get; set; } = 0.18f;
 
-	private readonly List<EnemyPrototype> livingEnemies = new();
-	private readonly HashSet<EnemyPrototype> projectileEnemies = new();
-	private readonly HashSet<EnemyPrototype> acidEnemies = new();
+	private readonly List<Enemy> livingEnemies = new();
+	private readonly HashSet<Enemy> projectileEnemies = new();
+	private readonly HashSet<Enemy> acidEnemies = new();
 
-	private PlayerPrototype? player;
+	private Player? player;
 	private HudController? hud;
 	private AbilityTreeUI? treeUi;
 	private Node2D? entitiesRoot;
@@ -54,7 +54,7 @@ public partial class Playground2Controller : Node2D
 
 	public override void _Ready()
 	{
-		player = GetNodeOrNull<PlayerPrototype>(PlayerPath);
+		player = GetNodeOrNull<Player>(PlayerPath);
 		hud = GetNodeOrNull<HudController>(HudPath);
 		treeUi = GetNodeOrNull<AbilityTreeUI>(AbilityTreePath);
 		entitiesRoot = GetNodeOrNull<Node2D>(EntitiesRootPath);
@@ -199,7 +199,7 @@ public partial class Playground2Controller : Node2D
 		int enemyCount = 3 + currentTier;
 		for (int index = 0; index < enemyCount; index++)
 		{
-			EnemyPrototype enemy = EnemyScene.Instantiate<EnemyPrototype>();
+			Enemy enemy = EnemyScene.Instantiate<Enemy>();
 			Vector2 spawnPoint = spawnPoints[index % spawnPoints.Count];
 			enemy.GlobalPosition = spawnPoint + new Vector2((index % 2 == 0 ? 1 : -1) * 12.0f * index, 0.0f);
 			bool elite = currentTier >= 3 && index == enemyCount - 1;
@@ -216,7 +216,7 @@ public partial class Playground2Controller : Node2D
 			: "Rift tier " + currentTier + " started.");
 	}
 
-	private void OnEnemyKilled(EnemyPrototype enemy)
+	private void OnEnemyKilled(Enemy enemy)
 	{
 		if (player == null)
 		{
@@ -250,7 +250,7 @@ public partial class Playground2Controller : Node2D
 			return;
 		}
 
-		foreach (EnemyPrototype enemy in livingEnemies)
+		foreach (Enemy enemy in livingEnemies)
 		{
 			if (!IsInstanceValid(enemy) || !projectileEnemies.Contains(enemy) || !enemy.CanUseRangedAttack())
 			{
@@ -424,7 +424,7 @@ public partial class Playground2Controller : Node2D
 
 		int projectileEnemyCount = GetScaledEnemyCount(livingEnemies.Count, BaseProjectileEnemyRatio, ProjectileRatioPerTier);
 		int acidEnemyCount = GetScaledEnemyCount(livingEnemies.Count, BaseAcidEnemyRatio, AcidRatioPerTier);
-		List<EnemyPrototype> shuffledEnemies = new(livingEnemies);
+		List<Enemy> shuffledEnemies = new(livingEnemies);
 
 		for (int index = shuffledEnemies.Count - 1; index > 0; index--)
 		{
@@ -432,7 +432,7 @@ public partial class Playground2Controller : Node2D
 			(shuffledEnemies[index], shuffledEnemies[swapIndex]) = (shuffledEnemies[swapIndex], shuffledEnemies[index]);
 		}
 
-		foreach (EnemyPrototype enemy in livingEnemies)
+		foreach (Enemy enemy in livingEnemies)
 		{
 			if (enemy.IsElite)
 			{

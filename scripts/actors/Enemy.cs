@@ -2,9 +2,9 @@
 
 using Godot;
 
-public partial class EnemyPrototype : CharacterBody2D
+public partial class Enemy : CharacterBody2D
 {
-	[Signal] public delegate void EnemyKilledEventHandler(EnemyPrototype enemy);
+	[Signal] public delegate void EnemyKilledEventHandler(Enemy enemy);
 
 	[Export] public NodePath VisualPath { get; set; } = new NodePath();
 	[Export] public float MoveSpeed { get; set; } = 52.0f;
@@ -31,7 +31,7 @@ public partial class EnemyPrototype : CharacterBody2D
 	private float scoutPoisonTickInterval = 4.0f;
 	private float scoutSlowMultiplier = 0.6f;
 	private CanvasItem? visual;
-	private PlayerPrototype? player;
+	private Player? player;
 	private Tween? hitTween;
 
 	public override void _Ready()
@@ -42,7 +42,7 @@ public partial class EnemyPrototype : CharacterBody2D
 		UpdateColor();
 	}
 
-	public void Configure(PlayerPrototype target, int tier, bool elite)
+	public void Configure(Player target, int tier, bool elite)
 	{
 		player = target;
 		RiftTier = tier;

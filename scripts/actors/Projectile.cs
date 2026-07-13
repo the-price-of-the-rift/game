@@ -73,13 +73,13 @@ public partial class Projectile : Area2D
 			return;
 		}
 
-		if (FromPlayer && body is EnemyPrototype enemy)
+		if (FromPlayer && body is Enemy enemy)
 		{
 			HitEnemy(enemy);
 			return;
 		}
 
-		if (!FromPlayer && body is PlayerPrototype player)
+		if (!FromPlayer && body is Player player)
 		{
 			player.TakeDamage(Damage);
 			QueueFree();
@@ -94,7 +94,7 @@ public partial class Projectile : Area2D
 		}
 	}
 
-	private void HitEnemy(EnemyPrototype enemy)
+	private void HitEnemy(Enemy enemy)
 	{
 		if (hitTargets.Contains(enemy))
 		{
@@ -128,7 +128,7 @@ public partial class Projectile : Area2D
 		{
 			foreach (Node2D body in GetOverlappingBodies())
 			{
-				if (body is EnemyPrototype enemy)
+				if (body is Enemy enemy)
 				{
 					HitEnemy(enemy);
 					if (!CanPierce || !IsInstanceValid(this))
@@ -142,7 +142,7 @@ public partial class Projectile : Area2D
 
 		foreach (Node2D body in GetOverlappingBodies())
 		{
-			if (body is PlayerPrototype player)
+			if (body is Player player)
 			{
 				player.TakeDamage(Damage);
 				QueueFree();
@@ -170,7 +170,7 @@ public partial class Projectile : Area2D
 				return;
 			}
 
-			if (FromPlayer && collider is EnemyPrototype enemy)
+			if (FromPlayer && collider is Enemy enemy)
 			{
 				HitEnemy(enemy);
 				if (!CanPierce || !IsInstanceValid(this))
@@ -179,7 +179,7 @@ public partial class Projectile : Area2D
 				}
 			}
 
-			if (!FromPlayer && collider is PlayerPrototype player)
+			if (!FromPlayer && collider is Player player)
 			{
 				player.TakeDamage(Damage);
 				QueueFree();

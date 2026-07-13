@@ -10,8 +10,8 @@ public partial class HudController : CanvasLayer
 	[Export] public NodePath HealthFillPath { get; set; } = new NodePath();
 	[Export] public NodePath ShieldFillPath { get; set; } = new NodePath();
 
-	private PlayerPrototype? player;
-	private Playground2Controller? world;
+	private Player? player;
+	private WorldController? world;
 	private Label? statsLabel;
 	private Label? loadoutLabel;
 	private Label? messageLabel;
@@ -71,7 +71,7 @@ public partial class HudController : CanvasLayer
 		}
 	}
 
-	public void Bind(PlayerPrototype boundPlayer, Playground2Controller boundWorld)
+	public void Bind(Player boundPlayer, WorldController boundWorld)
 	{
 		player = boundPlayer;
 		world = boundWorld;

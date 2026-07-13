@@ -11,7 +11,7 @@ public partial class AbilityTreeUI : CanvasLayer
 	[Export] public Color UnlockedColor { get; set; } = new Color(0.22f, 0.55f, 0.28f);
 	[Export] public Color BorderColor { get; set; } = new Color(0.85f, 0.85f, 0.82f);
 
-	private PlayerPrototype? player;
+	private Player? player;
 	private Label? infoLabel;
 	private Control? nodesRoot;
 	private readonly Godot.Collections.Dictionary<string, AbilityNodeButton> buttons = new();
@@ -24,7 +24,7 @@ public partial class AbilityTreeUI : CanvasLayer
 		CollectButtons(nodesRoot);
 	}
 
-	public void Bind(PlayerPrototype boundPlayer)
+	public void Bind(Player boundPlayer)
 	{
 		player = boundPlayer;
 		player.StatsChanged += Refresh;

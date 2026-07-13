@@ -4,7 +4,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class PlayerPrototype : CharacterBody2D
+public partial class Player : CharacterBody2D
 {
 	[Signal] public delegate void StatsChangedEventHandler();
 	[Signal] public delegate void AbilityUnlockedEventHandler(string abilityId);
@@ -45,7 +45,7 @@ public partial class PlayerPrototype : CharacterBody2D
 
 	private readonly HashSet<string> unlockedAbilities = new();
 	private readonly Dictionary<string, float> cooldowns = new();
-	private readonly HashSet<EnemyPrototype> dashHitEnemies = new();
+	private readonly HashSet<Enemy> dashHitEnemies = new();
 
 	private Sprite2D? sprite;
 	private Weapon? weapon;
@@ -638,7 +638,7 @@ public partial class PlayerPrototype : CharacterBody2D
 
 		foreach (Node node in GetTree().GetNodesInGroup("enemies"))
 		{
-			if (node is not EnemyPrototype enemy || !IsInstanceValid(enemy) || dashHitEnemies.Contains(enemy))
+			if (node is not Enemy enemy || !IsInstanceValid(enemy) || dashHitEnemies.Contains(enemy))
 			{
 				continue;
 			}
@@ -667,7 +667,7 @@ public partial class PlayerPrototype : CharacterBody2D
 		bool hitSomething = false;
 		foreach (Node node in GetTree().GetNodesInGroup("enemies"))
 		{
-			if (node is not EnemyPrototype enemy || !IsInstanceValid(enemy))
+			if (node is not Enemy enemy || !IsInstanceValid(enemy))
 			{
 				continue;
 			}
