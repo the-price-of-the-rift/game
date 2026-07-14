@@ -1,0 +1,104 @@
+[gd_scene format=4 uid="uid://brift0combat1"]
+
+[ext_resource type="Script" path="res://scripts/world/RiftController.cs" id="1_ctrl"]
+[ext_resource type="Texture2D" uid="uid://dj6iekrvneq3h" path="res://assets/grass_tile.png" id="3_m8u5f"]
+[ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="3_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/projectile.tscn" id="6_projectile"]
+[ext_resource type="PackedScene" path="res://scenes/toxic_area.tscn" id="7_toxic"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_is3ju"]
+resource_name = "grass_tile"
+texture = ExtResource("3_m8u5f")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_rift"]
+sources/0 = SubResource("TileSetAtlasSource_is3ju")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cover"]
+size = Vector2(34, 56)
+
+[node name="Rift" type="Node2D"]
+script = ExtResource("1_ctrl")
+EnemyScene = ExtResource("3_enemy")
+ProjectileScene = ExtResource("6_projectile")
+ToxicAreaScene = ExtResource("7_toxic")
+EntitiesRootPath = NodePath("Entities")
+SpawnPointsRootPath = NodePath("SpawnPoints")
+PoisonVisualPath = NodePath("PoisonCloud")
+
+[node name="Map" type="Node2D" parent="."]
+
+[node name="TileMapLayer" type="TileMapLayer" parent="Map"]
+position = Vector2(-19, 5)
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAANAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAARAAAAAAAAAAAAAAASAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAVAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAXAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAZAAAAAAAAAAAA")
+tile_set = SubResource("TileSet_rift")
+
+[node name="EntryMarker" type="Marker2D" parent="."]
+position = Vector2(320, 300)
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="Spawn01" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(64, 64)
+
+[node name="Spawn02" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(520, 72)
+
+[node name="Spawn03" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(96, 290)
+
+[node name="Spawn04" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(544, 284)
+
+[node name="Spawn05" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(320, 56)
+
+[node name="Spawn06" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(320, 308)
+
+[node name="PoisonCloud" type="Polygon2D" parent="."]
+position = Vector2(320, 182)
+color = Color(0.24, 0.78, 0.25, 0.34)
+polygon = PackedVector2Array(58, 0, 48, 32, 18, 55, -18, 55, -48, 32, -58, 0, -48, -32, -18, -55, 18, -55, 48, -32)
+
+[node name="CoverTopLeft" type="StaticBody2D" parent="."]
+position = Vector2(236, 142)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CoverTopLeft"]
+shape = SubResource("RectangleShape2D_cover")
+
+[node name="Polygon2D" type="Polygon2D" parent="CoverTopLeft"]
+color = Color(0.28, 0.32, 0.36, 1)
+polygon = PackedVector2Array(-17, -28, 17, -28, 17, 28, -17, 28)
+
+[node name="CoverTopRight" type="StaticBody2D" parent="."]
+position = Vector2(404, 142)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CoverTopRight"]
+shape = SubResource("RectangleShape2D_cover")
+
+[node name="Polygon2D" type="Polygon2D" parent="CoverTopRight"]
+color = Color(0.28, 0.32, 0.36, 1)
+polygon = PackedVector2Array(-17, -28, 17, -28, 17, 28, -17, 28)
+
+[node name="CoverBottomLeft" type="StaticBody2D" parent="."]
+position = Vector2(236, 226)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CoverBottomLeft"]
+shape = SubResource("RectangleShape2D_cover")
+
+[node name="Polygon2D" type="Polygon2D" parent="CoverBottomLeft"]
+color = Color(0.28, 0.32, 0.36, 1)
+polygon = PackedVector2Array(-17, -28, 17, -28, 17, 28, -17, 28)
+
+[node name="CoverBottomRight" type="StaticBody2D" parent="."]
+position = Vector2(404, 226)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CoverBottomRight"]
+shape = SubResource("RectangleShape2D_cover")
+
+[node name="Polygon2D" type="Polygon2D" parent="CoverBottomRight"]
+color = Color(0.28, 0.32, 0.36, 1)
+polygon = PackedVector2Array(-17, -28, 17, -28, 17, 28, -17, 28)

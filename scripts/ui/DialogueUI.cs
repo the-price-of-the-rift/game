@@ -62,15 +62,16 @@ public partial class DialogueUI : CanvasLayer
 		{
 			SetBody(HostileLine(npc.Faction));
 		}
-		else if (npc.IsTeacher && standing == Standing.Friendly && !string.IsNullOrEmpty(npc.TeachAbilityId))
+		else if (npc.IsTeacher && npc.Faction == Faction.Kings && standing == Standing.Friendly && npc.TeachBranch != BuildBranch.None)
 		{
-			if (player.HasAbility(npc.TeachAbilityId))
+			string nextAbility = player.GetNextTeachableActive(npc.TeachBranch);
+			if (string.IsNullOrEmpty(nextAbility))
 			{
 				SetBody("I have nothing left to teach you.");
 			}
-			else if (AbilityDefinitions.All.TryGetValue(npc.TeachAbilityId, out AbilityDefinition? definition))
+			else if (AbilityDefinitions.All.TryGetValue(nextAbility, out AbilityDefinition? definition))
 			{
-				pendingAbilityId = npc.TeachAbilityId;
+				pendingAbilityId = nextAbility;
 				offerTeach = true;
 				SetBody("You have earned my trust. Let me teach you " + definition.DisplayName + ".\n" + definition.Description);
 			}
@@ -79,9 +80,9 @@ public partial class DialogueUI : CanvasLayer
 				SetBody(string.IsNullOrEmpty(npc.FlavorText) ? "Well met." : npc.FlavorText);
 			}
 		}
-		else if (npc.IsTeacher && !string.IsNullOrEmpty(npc.TeachAbilityId))
+		else if (npc.IsTeacher && npc.Faction == Faction.Kings && npc.TeachBranch != BuildBranch.None)
 		{
-			SetBody("Prove yourself to the village first. Then I will teach you what I know.");
+			SetBody("Prove yourself to the crown first. Then I will teach you what I know.");
 		}
 		else
 		{
@@ -140,9 +141,8 @@ public partial class DialogueUI : CanvasLayer
 	{
 		return faction switch
 		{
-			Faction.Order => "The Order has no words for a tax collector. Earn your standing.",
+			Faction.Kings => "The King's men have no words for a tax collector. Earn your standing.",
 			Faction.Villagers => "Leave us be, reeve. You have taken enough.",
-			Faction.Outcasts => "We do not trust outsiders. Not yet.",
 			_ => "Go away.",
 		};
 	}

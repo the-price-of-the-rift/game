@@ -9,6 +9,7 @@ public partial class AbilityTreeUI : CanvasLayer
 	[Export] public Color LockedColor { get; set; } = new Color(0.22f, 0.24f, 0.28f);
 	[Export] public Color AvailableColor { get; set; } = new Color(0.68f, 0.55f, 0.2f);
 	[Export] public Color UnlockedColor { get; set; } = new Color(0.22f, 0.55f, 0.28f);
+	[Export] public Color GuardianColor { get; set; } = new Color(0.3f, 0.28f, 0.45f);
 	[Export] public Color BorderColor { get; set; } = new Color(0.85f, 0.85f, 0.82f);
 
 	private Player? player;
@@ -90,10 +91,28 @@ public partial class AbilityTreeUI : CanvasLayer
 
 			bool unlocked = player.HasAbility(abilityId);
 			bool canUnlock = player.CanUnlock(abilityId);
-			button.Text = definition.DisplayName + "\nCost " + definition.Cost;
-			button.TooltipText = definition.Description + "\nNeed Level " + definition.RequiredLevel + " | Rep " + definition.RequiredReputation;
 
-			Color fill = unlocked ? UnlockedColor : canUnlock ? AvailableColor : LockedColor;
+			Color fill;
+			if (unlocked)
+			{
+				button.Text = definition.DisplayName + "\nCost " + definition.Cost;
+				button.TooltipText = definition.Description + "\nNeed Level " + definition.RequiredLevel + " | Rep " + definition.RequiredReputation;
+				fill = UnlockedColor;
+			}
+			else if (definition.IsActive)
+			{
+				// Actives are guardian-taught only; the tree shows them but never sells them.
+				button.Text = definition.DisplayName + "\nGuardian";
+				button.TooltipText = definition.Description + "\nLearn this from a King's guardian.";
+				fill = GuardianColor;
+			}
+			else
+			{
+				button.Text = definition.DisplayName + "\nCost " + definition.Cost;
+				button.TooltipText = definition.Description + "\nNeed Level " + definition.RequiredLevel + " | Rep " + definition.RequiredReputation;
+				fill = canUnlock ? AvailableColor : LockedColor;
+			}
+
 			StyleBoxFlat normal = new()
 			{
 				BgColor = fill,

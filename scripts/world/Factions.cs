@@ -5,8 +5,7 @@ using Godot;
 public enum Faction
 {
 	Villagers,
-	Order,
-	Outcasts,
+	Kings,
 }
 
 public enum Standing
@@ -17,18 +16,17 @@ public enum Standing
 }
 
 // One global reputation drives every faction; each reacts at its own thresholds.
-// Order stays cold until high rep (harsh Order favors the Warrior build, per the GDD);
-// Outcasts warm up earliest. No per-faction bookkeeping.
+// The King's faction stays cold until high rep (its guardians only teach the trusted);
+// Villagers warm up earlier. No per-faction bookkeeping.
 public static class Factions
 {
 	public static Standing GetStanding(Faction faction, int reputation)
 	{
 		(int neutral, int friendly) = faction switch
 		{
-			Faction.Order => (25, 55),
-			Faction.Villagers => (15, 40),
-			Faction.Outcasts => (5, 25),
-			_ => (15, 40),
+			Faction.Kings => (20, 50),
+			Faction.Villagers => (10, 30),
+			_ => (10, 30),
 		};
 
 		if (reputation >= friendly)
@@ -44,8 +42,7 @@ public static class Factions
 		return faction switch
 		{
 			Faction.Villagers => "Villagers",
-			Faction.Order => "Order",
-			Faction.Outcasts => "Outcasts",
+			Faction.Kings => "King's Faction",
 			_ => "Villagers",
 		};
 	}

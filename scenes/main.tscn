@@ -1,0 +1,40 @@
+[gd_scene format=4 uid="uid://cnhvhorn3olwx"]
+
+[ext_resource type="Script" path="res://scripts/world/MainController.cs" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="3_hud"]
+[ext_resource type="PackedScene" uid="uid://dwxhbehfhsxyh" path="res://scenes/ability_tree.tscn" id="4_tree"]
+[ext_resource type="PackedScene" path="res://scenes/dialogue.tscn" id="5_dialogue"]
+[ext_resource type="PackedScene" uid="uid://bvillage0rift1" path="res://scenes/village.tscn" id="6_village"]
+[ext_resource type="PackedScene" uid="uid://brift0combat1" path="res://scenes/rift.tscn" id="7_rift"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+VillageScene = ExtResource("6_village")
+RiftScene = ExtResource("7_rift")
+PlayerPath = NodePath("Player")
+HudPath = NodePath("Hud")
+AbilityTreePath = NodePath("AbilityTree")
+DialogueUiPath = NodePath("Dialogue")
+WorldPromptLabelPath = NodePath("WorldPromptLabel")
+WorldSlotPath = NodePath("WorldSlot")
+
+[node name="WorldSlot" type="Node2D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(76, 235)
+
+[node name="WorldPromptLabel" type="Label" parent="."]
+offset_left = 154.0
+offset_top = 10.0
+offset_right = 486.0
+offset_bottom = 42.0
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Hud" parent="." instance=ExtResource("3_hud")]
+
+[node name="AbilityTree" parent="." instance=ExtResource("4_tree")]
+
+[node name="Dialogue" parent="." instance=ExtResource("5_dialogue")]

@@ -115,12 +115,19 @@ public partial class Player : CharacterBody2D
 			return false;
 		}
 
+		// Actives are taught by King's guardians only; the tree never grants them.
+		if (definition.IsActive)
+		{
+			return false;
+		}
+
 		if (MagicStones < definition.Cost || Level < definition.RequiredLevel || Reputation < definition.RequiredReputation)
 		{
 			return false;
 		}
 
-		if (definition.Branch != BuildBranch.None && ChosenBranch != BuildBranch.None && definition.Branch != ChosenBranch)
+		// Branch passives need a committed matching branch (a guardian sets it); neutral passives don't.
+		if (definition.Branch != BuildBranch.None && definition.Branch != ChosenBranch)
 		{
 			return false;
 		}
@@ -160,9 +167,19 @@ public partial class Player : CharacterBody2D
 			return false;
 		}
 
-		if (definition.Branch != BuildBranch.None && ChosenBranch != BuildBranch.None && definition.Branch != ChosenBranch)
+		// Actives are taught by King's guardians only; the tree never grants them.
+		if (definition.IsActive)
 		{
-			LastTreeMessage = "You already committed to the " + AbilityDefinitions.GetBranchName(ChosenBranch) + " build.";
+			LastTreeMessage = "Learn this from a King's guardian, not the tree.";
+			return false;
+		}
+
+		// Branch passives require a branch already committed by a guardian's teaching.
+		if (definition.Branch != BuildBranch.None && definition.Branch != ChosenBranch)
+		{
+			LastTreeMessage = ChosenBranch == BuildBranch.None
+				? "Learn an active from a King's guardian to choose a branch first."
+				: "You already committed to the " + AbilityDefinitions.GetBranchName(ChosenBranch) + " build.";
 			return false;
 		}
 
@@ -195,10 +212,6 @@ public partial class Player : CharacterBody2D
 
 		MagicStones -= definition.Cost;
 		unlockedAbilities.Add(abilityId);
-		if (ChosenBranch == BuildBranch.None && definition.Branch != BuildBranch.None)
-		{
-			ChosenBranch = definition.Branch;
-		}
 
 		RefreshStats();
 		LastTreeMessage = "Unlocked " + definition.DisplayName + ".";
@@ -249,6 +262,52 @@ public partial class Player : CharacterBody2D
 		EmitSignal(SignalName.AbilityUnlocked, abilityId);
 		EmitSignal(SignalName.StatsChanged);
 		return true;
+	}
+
+	// Progressive teaching: the next unlearned active in a branch whose prerequisites
+	// are already met, ordered by DisplayOrder. Returns "" when the branch line is done
+	// or the next active isn't reachable yet (e.g. wrong committed branch).
+	public string GetNextTeachableActive(BuildBranch branch)
+	{
+		if (branch == BuildBranch.None)
+		{
+			return "";
+		}
+
+		if (ChosenBranch != BuildBranch.None && ChosenBranch != branch)
+		{
+			return "";
+		}
+
+		foreach (string abilityId in AbilityDefinitions.DisplayOrder)
+		{
+			if (!AbilityDefinitions.All.TryGetValue(abilityId, out AbilityDefinition? definition))
+			{
+				continue;
+			}
+
+			if (definition.Branch != branch || !definition.IsActive || unlockedAbilities.Contains(abilityId))
+			{
+				continue;
+			}
+
+			bool prerequisitesMet = true;
+			foreach (string prerequisite in definition.Prerequisites)
+			{
+				if (!unlockedAbilities.Contains(prerequisite))
+				{
+					prerequisitesMet = false;
+					break;
+				}
+			}
+
+			if (prerequisitesMet)
+			{
+				return abilityId;
+			}
+		}
+
+		return "";
 	}
 
 	public void GainXp(int amount)

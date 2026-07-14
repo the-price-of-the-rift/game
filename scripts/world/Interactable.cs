@@ -28,6 +28,10 @@ public partial class Interactable : Node2D
 	[Export] public bool IsTeacher { get; set; } = false;
 	[Export] public string TeachAbilityId { get; set; } = "";
 
+	// Teacher only: the branch this guardian trains. Progressive teaching grants the
+	// next unlearned active in this branch whose prerequisites are met.
+	[Export] public BuildBranch TeachBranch { get; set; } = BuildBranch.None;
+
 	public override void _Ready()
 	{
 		AddToGroup("interactables");
