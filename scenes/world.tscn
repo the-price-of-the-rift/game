@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://dwxhbehfhsxyh" path="res://scenes/ability_tree.tscn" id="5_tree"]
 [ext_resource type="PackedScene" path="res://scenes/projectile.tscn" id="6_projectile"]
 [ext_resource type="PackedScene" path="res://scenes/toxic_area.tscn" id="7_toxic"]
+[ext_resource type="Script" path="res://scripts/world/Interactable.cs" id="8_interact"]
+[ext_resource type="PackedScene" path="res://scenes/dialogue.tscn" id="9_dialogue"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_is3ju"]
 resource_name = "grass_tile"
@@ -42,8 +44,8 @@ HudPath = NodePath("Hud")
 AbilityTreePath = NodePath("AbilityTree")
 EntitiesRootPath = NodePath("Entities")
 WorldPromptLabelPath = NodePath("WorldPromptLabel")
-BoardMarkerPath = NodePath("BoardMarker")
-PortalMarkerPath = NodePath("PortalMarker")
+DialogueUiPath = NodePath("Dialogue")
+HousesRootPath = NodePath("Houses")
 RespawnPointPath = NodePath("RespawnPoint")
 SpawnPointsRootPath = NodePath("SpawnPoints")
 HazardOriginsRootPath = NodePath("HazardOrigins")
@@ -61,46 +63,45 @@ position = Vector2(76, 235)
 
 [node name="Entities" type="Node2D" parent="." unique_id=1044121469]
 
-[node name="BoardMarker" type="Marker2D" parent="." unique_id=1932738202]
+[node name="Board" type="Node2D" parent="."]
 position = Vector2(104, 178)
+script = ExtResource("8_interact")
+Kind = 0
+Radius = 44.0
+DisplayName = "notice board"
 
-[node name="BoardVisual" type="Node2D" parent="." unique_id=1214986188]
-position = Vector2(30, 349)
-
-[node name="BoardSign" type="Polygon2D" parent="BoardVisual" unique_id=420211637]
-position = Vector2(4, -30)
+[node name="BoardSign" type="Polygon2D" parent="Board"]
 color = Color(0.42, 0.29, 0.15, 1)
 polygon = PackedVector2Array(-18, -24, 18, -24, 18, 24, -18, 24)
 
-[node name="BoardText" type="Label" parent="BoardVisual/BoardSign" unique_id=850524705]
-offset_left = -73.0
-offset_top = -63.0
-offset_right = 87.0
-offset_bottom = -15.0
+[node name="BoardText" type="Label" parent="Board"]
+offset_left = -80.0
+offset_top = -60.0
+offset_right = 80.0
+offset_bottom = -28.0
 theme_override_font_sizes/font_size = 10
-text = "Village Board
-Press H nearby"
+text = "Village Board"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="PortalMarker" type="Marker2D" parent="." unique_id=1408964314]
+[node name="Portal" type="Node2D" parent="."]
 position = Vector2(536, 178)
+script = ExtResource("8_interact")
+Kind = 1
+Radius = 46.0
+DisplayName = "rift gate"
 
-[node name="PortalVisual" type="Node2D" parent="." unique_id=774493412]
-position = Vector2(536, 178)
-
-[node name="PortalCrystal" type="Polygon2D" parent="PortalVisual" unique_id=2077044257]
+[node name="PortalCrystal" type="Polygon2D" parent="Portal"]
 color = Color(0.18, 0.78, 0.92, 1)
 polygon = PackedVector2Array(0, -28, 20, 0, 0, 28, -20, 0)
 
-[node name="PortalText" type="Label" parent="PortalVisual" unique_id=819114630]
+[node name="PortalText" type="Label" parent="Portal"]
 offset_left = -84.0
 offset_top = 30.0
 offset_right = 86.0
-offset_bottom = 78.0
+offset_bottom = 62.0
 theme_override_font_sizes/font_size = 10
-text = "Rift Gate
-Press N nearby"
+text = "Rift Gate"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -195,3 +196,282 @@ autowrap_mode = 3
 [node name="Hud" parent="." unique_id=25013807 instance=ExtResource("4_hud")]
 
 [node name="AbilityTree" parent="." unique_id=34019490 instance=ExtResource("5_tree")]
+
+[node name="Dialogue" parent="." instance=ExtResource("9_dialogue")]
+
+[node name="Stations" type="Node2D" parent="."]
+
+[node name="Bonfire" type="Node2D" parent="Stations"]
+position = Vector2(60, 200)
+script = ExtResource("8_interact")
+Kind = 2
+Radius = 40.0
+DisplayName = "bonfire"
+HealsPlayer = true
+
+[node name="Body" type="Polygon2D" parent="Stations/Bonfire"]
+color = Color(0.85, 0.45, 0.15, 1)
+polygon = PackedVector2Array(-12, -12, 12, -12, 12, 12, -12, 12)
+
+[node name="Label" type="Label" parent="Stations/Bonfire"]
+offset_left = -40.0
+offset_top = 14.0
+offset_right = 40.0
+offset_bottom = 30.0
+theme_override_font_sizes/font_size = 10
+text = "Bonfire"
+horizontal_alignment = 1
+
+[node name="Anvil" type="Node2D" parent="Stations"]
+position = Vector2(200, 330)
+script = ExtResource("8_interact")
+Kind = 2
+Radius = 40.0
+DisplayName = "anvil"
+FlavorText = "The anvil is cold. Smithing upgrades are not ready yet."
+
+[node name="Body" type="Polygon2D" parent="Stations/Anvil"]
+color = Color(0.4, 0.42, 0.46, 1)
+polygon = PackedVector2Array(-12, -10, 12, -10, 12, 10, -12, 10)
+
+[node name="Label" type="Label" parent="Stations/Anvil"]
+offset_left = -40.0
+offset_top = -30.0
+offset_right = 40.0
+offset_bottom = -14.0
+theme_override_font_sizes/font_size = 10
+text = "Anvil"
+horizontal_alignment = 1
+
+[node name="Alchemy" type="Node2D" parent="Stations"]
+position = Vector2(280, 330)
+script = ExtResource("8_interact")
+Kind = 2
+Radius = 40.0
+DisplayName = "alchemy table"
+FlavorText = "Vials bubble here, but brewing is not ready yet."
+
+[node name="Body" type="Polygon2D" parent="Stations/Alchemy"]
+color = Color(0.35, 0.6, 0.4, 1)
+polygon = PackedVector2Array(-12, -10, 12, -10, 12, 10, -12, 10)
+
+[node name="Label" type="Label" parent="Stations/Alchemy"]
+offset_left = -44.0
+offset_top = -30.0
+offset_right = 44.0
+offset_bottom = -14.0
+theme_override_font_sizes/font_size = 10
+text = "Alchemy"
+horizontal_alignment = 1
+
+[node name="Workbench" type="Node2D" parent="Stations"]
+position = Vector2(360, 330)
+script = ExtResource("8_interact")
+Kind = 2
+Radius = 40.0
+DisplayName = "workbench"
+FlavorText = "The workbench waits. Crafting is not ready yet."
+
+[node name="Body" type="Polygon2D" parent="Stations/Workbench"]
+color = Color(0.5, 0.38, 0.25, 1)
+polygon = PackedVector2Array(-12, -10, 12, -10, 12, 10, -12, 10)
+
+[node name="Label" type="Label" parent="Stations/Workbench"]
+offset_left = -44.0
+offset_top = -30.0
+offset_right = 44.0
+offset_bottom = -14.0
+theme_override_font_sizes/font_size = 10
+text = "Workbench"
+horizontal_alignment = 1
+
+[node name="Npcs" type="Node2D" parent="."]
+
+[node name="Mara" type="Node2D" parent="Npcs"]
+position = Vector2(150, 100)
+script = ExtResource("8_interact")
+Kind = 3
+Radius = 40.0
+DisplayName = "Mara"
+FlavorText = "You came back. I knew you were not like the others they warn us about."
+
+[node name="Body" type="Polygon2D" parent="Npcs/Mara"]
+color = Color(0.85, 0.7, 0.55, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/Mara"]
+offset_left = -40.0
+offset_top = -32.0
+offset_right = 40.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Mara"
+horizontal_alignment = 1
+
+[node name="Blacksmith" type="Node2D" parent="Npcs"]
+position = Vector2(90, 150)
+script = ExtResource("8_interact")
+Kind = 3
+Radius = 40.0
+DisplayName = "Blacksmith"
+Faction = 0
+IsTeacher = true
+TeachAbilityId = "slash"
+
+[node name="Body" type="Polygon2D" parent="Npcs/Blacksmith"]
+color = Color(0.6, 0.5, 0.45, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/Blacksmith"]
+offset_left = -48.0
+offset_top = -32.0
+offset_right = 48.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Blacksmith"
+horizontal_alignment = 1
+
+[node name="SisterVerity" type="Node2D" parent="Npcs"]
+position = Vector2(470, 240)
+script = ExtResource("8_interact")
+Kind = 3
+Radius = 40.0
+DisplayName = "Sister Verity"
+Faction = 1
+IsTeacher = true
+TeachAbilityId = "multi_arrow"
+
+[node name="Body" type="Polygon2D" parent="Npcs/SisterVerity"]
+color = Color(0.75, 0.75, 0.8, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/SisterVerity"]
+offset_left = -52.0
+offset_top = -32.0
+offset_right = 52.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Sister Verity"
+horizontal_alignment = 1
+
+[node name="RaggedHann" type="Node2D" parent="Npcs"]
+position = Vector2(150, 300)
+script = ExtResource("8_interact")
+Kind = 3
+Radius = 40.0
+DisplayName = "Ragged Hann"
+Faction = 2
+IsTeacher = true
+TeachAbilityId = "dash_hit"
+
+[node name="Body" type="Polygon2D" parent="Npcs/RaggedHann"]
+color = Color(0.45, 0.4, 0.35, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/RaggedHann"]
+offset_left = -52.0
+offset_top = -32.0
+offset_right = 52.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Ragged Hann"
+horizontal_alignment = 1
+
+[node name="Houses" type="Node2D" parent="."]
+
+[node name="GirlHouse" type="Node2D" parent="Houses"]
+position = Vector2(150, 52)
+
+[node name="Intact" type="Node2D" parent="Houses/GirlHouse"]
+
+[node name="Walls" type="Polygon2D" parent="Houses/GirlHouse/Intact"]
+color = Color(0.55, 0.42, 0.28, 1)
+polygon = PackedVector2Array(-22, -6, 22, -6, 22, 22, -22, 22)
+
+[node name="Roof" type="Polygon2D" parent="Houses/GirlHouse/Intact"]
+color = Color(0.62, 0.26, 0.22, 1)
+polygon = PackedVector2Array(-26, -6, 26, -6, 0, -30)
+
+[node name="Label" type="Label" parent="Houses/GirlHouse/Intact"]
+offset_left = -44.0
+offset_top = 24.0
+offset_right = 44.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 10
+text = "Her House"
+horizontal_alignment = 1
+
+[node name="Broken" type="Node2D" parent="Houses/GirlHouse"]
+visible = false
+
+[node name="Rubble" type="Polygon2D" parent="Houses/GirlHouse/Broken"]
+color = Color(0.2, 0.18, 0.16, 1)
+polygon = PackedVector2Array(-22, 4, -12, -10, -2, 2, 8, -8, 22, 6, 22, 22, -22, 22)
+
+[node name="Label" type="Label" parent="Houses/GirlHouse/Broken"]
+offset_left = -44.0
+offset_top = 24.0
+offset_right = 44.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 10
+text = "Her House (broken)"
+horizontal_alignment = 1
+
+[node name="NeighborHouse" type="Node2D" parent="Houses"]
+position = Vector2(250, 52)
+
+[node name="Intact" type="Node2D" parent="Houses/NeighborHouse"]
+
+[node name="Walls" type="Polygon2D" parent="Houses/NeighborHouse/Intact"]
+color = Color(0.5, 0.44, 0.3, 1)
+polygon = PackedVector2Array(-22, -6, 22, -6, 22, 22, -22, 22)
+
+[node name="Roof" type="Polygon2D" parent="Houses/NeighborHouse/Intact"]
+color = Color(0.5, 0.3, 0.24, 1)
+polygon = PackedVector2Array(-26, -6, 26, -6, 0, -30)
+
+[node name="Broken" type="Node2D" parent="Houses/NeighborHouse"]
+visible = false
+
+[node name="Rubble" type="Polygon2D" parent="Houses/NeighborHouse/Broken"]
+color = Color(0.2, 0.18, 0.16, 1)
+polygon = PackedVector2Array(-22, 4, -10, -8, 2, 2, 10, -6, 22, 6, 22, 22, -22, 22)
+
+[node name="Label" type="Label" parent="Houses/NeighborHouse/Broken"]
+offset_left = -44.0
+offset_top = 24.0
+offset_right = 44.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 10
+text = "(broken)"
+horizontal_alignment = 1
+
+[node name="OutcastHut" type="Node2D" parent="Houses"]
+position = Vector2(460, 110)
+
+[node name="Intact" type="Node2D" parent="Houses/OutcastHut"]
+
+[node name="Walls" type="Polygon2D" parent="Houses/OutcastHut/Intact"]
+color = Color(0.45, 0.4, 0.32, 1)
+polygon = PackedVector2Array(-20, -4, 20, -4, 20, 20, -20, 20)
+
+[node name="Roof" type="Polygon2D" parent="Houses/OutcastHut/Intact"]
+color = Color(0.4, 0.34, 0.26, 1)
+polygon = PackedVector2Array(-24, -4, 24, -4, 0, -26)
+
+[node name="Broken" type="Node2D" parent="Houses/OutcastHut"]
+visible = false
+
+[node name="Rubble" type="Polygon2D" parent="Houses/OutcastHut/Broken"]
+color = Color(0.18, 0.16, 0.15, 1)
+polygon = PackedVector2Array(-20, 6, -8, -6, 4, 2, 12, -4, 20, 6, 20, 20, -20, 20)
+
+[node name="Label" type="Label" parent="Houses/OutcastHut/Broken"]
+offset_left = -44.0
+offset_top = 22.0
+offset_right = 44.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 10
+text = "(broken)"
+horizontal_alignment = 1
+

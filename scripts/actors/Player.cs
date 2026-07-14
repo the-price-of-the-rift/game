@@ -207,6 +207,50 @@ public partial class Player : CharacterBody2D
 		return true;
 	}
 
+	// NPC-taught skill: grants an active for free (no magic stones, no level/reputation gate),
+	// but still respects the branch commit and prerequisites so teaching stays coherent.
+	public bool FreeUnlock(string abilityId)
+	{
+		if (!AbilityDefinitions.All.TryGetValue(abilityId, out AbilityDefinition? definition))
+		{
+			LastTreeMessage = "Unknown ability.";
+			return false;
+		}
+
+		if (unlockedAbilities.Contains(abilityId))
+		{
+			LastTreeMessage = definition.DisplayName + " is already learned.";
+			return false;
+		}
+
+		if (definition.Branch != BuildBranch.None && ChosenBranch != BuildBranch.None && definition.Branch != ChosenBranch)
+		{
+			LastTreeMessage = "You already committed to the " + AbilityDefinitions.GetBranchName(ChosenBranch) + " build.";
+			return false;
+		}
+
+		foreach (string prerequisite in definition.Prerequisites)
+		{
+			if (!unlockedAbilities.Contains(prerequisite))
+			{
+				LastTreeMessage = "You are not ready to learn " + definition.DisplayName + " yet.";
+				return false;
+			}
+		}
+
+		unlockedAbilities.Add(abilityId);
+		if (ChosenBranch == BuildBranch.None && definition.Branch != BuildBranch.None)
+		{
+			ChosenBranch = definition.Branch;
+		}
+
+		RefreshStats();
+		LastTreeMessage = "Learned " + definition.DisplayName + ".";
+		EmitSignal(SignalName.AbilityUnlocked, abilityId);
+		EmitSignal(SignalName.StatsChanged);
+		return true;
+	}
+
 	public void GainXp(int amount)
 	{
 		Xp += amount;

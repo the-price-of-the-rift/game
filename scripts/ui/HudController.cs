@@ -57,7 +57,10 @@ public partial class HudController : CanvasLayer
 				"HP " + player.CurrentHealth.ToString("0") + "/" + player.MaxHealth.ToString("0") +
 				"  Shield " + player.CurrentShield.ToString("0") + "/" + player.MaxShield.ToString("0") +
 				"\nLevel " + player.Level + "  XP " + player.Xp + "  Rep " + player.Reputation + "  Stones " + player.MagicStones +
-				"\nBuild " + player.GetBuildName() + "  Rift Tier " + world.CurrentTier + (world.RiftActive ? " (active)" : " (intermission)");
+				"\nBuild " + player.GetBuildName() + "  Rift Tier " + world.CurrentTier + (world.RiftActive ? " (active)" : " (intermission)") +
+				"\nVillagers: " + Factions.GetStanding(Faction.Villagers, player.Reputation) +
+				"  Order: " + Factions.GetStanding(Faction.Order, player.Reputation) +
+				"  Outcasts: " + Factions.GetStanding(Faction.Outcasts, player.Reputation);
 		}
 
 		if (loadoutLabel != null)

@@ -13,14 +13,12 @@ public partial class WorldController : Node2D
 	[Export] public NodePath AbilityTreePath { get; set; } = new NodePath();
 	[Export] public NodePath EntitiesRootPath { get; set; } = new NodePath();
 	[Export] public NodePath WorldPromptLabelPath { get; set; } = new NodePath();
-	[Export] public NodePath BoardMarkerPath { get; set; } = new NodePath();
-	[Export] public NodePath PortalMarkerPath { get; set; } = new NodePath();
+	[Export] public NodePath DialogueUiPath { get; set; } = new NodePath();
 	[Export] public NodePath RespawnPointPath { get; set; } = new NodePath();
 	[Export] public NodePath SpawnPointsRootPath { get; set; } = new NodePath();
 	[Export] public NodePath HazardOriginsRootPath { get; set; } = new NodePath();
 	[Export] public NodePath PoisonVisualPath { get; set; } = new NodePath();
-	[Export] public float BoardInteractionRadius { get; set; } = 60.0f;
-	[Export] public float PortalInteractionRadius { get; set; } = 60.0f;
+	[Export] public NodePath HousesRootPath { get; set; } = new NodePath();
 	[Export] public float PoisonRadius { get; set; } = 58.0f;
 	[Export] public float BaseProjectileEnemyRatio { get; set; } = 0.2f;
 	[Export] public float BaseAcidEnemyRatio { get; set; } = 0.25f;
@@ -34,20 +32,20 @@ public partial class WorldController : Node2D
 	private Player? player;
 	private HudController? hud;
 	private AbilityTreeUI? treeUi;
+	private DialogueUI? dialogueUi;
 	private Node2D? entitiesRoot;
 	private Label? worldPrompt;
-	private Node2D? boardMarker;
-	private Node2D? portalMarker;
 	private Node2D? respawnPoint;
 	private Node? spawnPointsRoot;
 	private Node? hazardOriginsRoot;
+	private Node? housesRoot;
 	private CanvasItem? poisonVisual;
 	private int currentTier = 1;
 	private float projectileVolleyTimer = 2.8f;
 	private float poisonTickTimer = 0.4f;
 	private float toxicAreaDamageScale = 1.0f;
 	private bool riftActive = false;
-	private bool intermissionChoiceUsed = false;
+	private bool riftEventFired = false;
 
 	public int CurrentTier => currentTier;
 	public bool RiftActive => riftActive;
@@ -57,13 +55,13 @@ public partial class WorldController : Node2D
 		player = GetNodeOrNull<Player>(PlayerPath);
 		hud = GetNodeOrNull<HudController>(HudPath);
 		treeUi = GetNodeOrNull<AbilityTreeUI>(AbilityTreePath);
+		dialogueUi = GetNodeOrNull<DialogueUI>(DialogueUiPath);
 		entitiesRoot = GetNodeOrNull<Node2D>(EntitiesRootPath);
 		worldPrompt = GetNodeOrNull<Label>(WorldPromptLabelPath);
-		boardMarker = GetNodeOrNull<Node2D>(BoardMarkerPath);
-		portalMarker = GetNodeOrNull<Node2D>(PortalMarkerPath);
 		respawnPoint = GetNodeOrNull<Node2D>(RespawnPointPath);
 		spawnPointsRoot = GetNodeOrNull<Node>(SpawnPointsRootPath);
 		hazardOriginsRoot = GetNodeOrNull<Node>(HazardOriginsRootPath);
+		housesRoot = GetNodeOrNull<Node>(HousesRootPath);
 		poisonVisual = GetNodeOrNull<CanvasItem>(PoisonVisualPath);
 
 		if (player == null)
@@ -76,6 +74,7 @@ public partial class WorldController : Node2D
 		player.SetProjectileContainer(entitiesRoot ?? this);
 		hud?.Bind(player, this);
 		treeUi?.Bind(player);
+		dialogueUi?.Bind(player);
 
 		if (poisonVisual != null)
 		{
@@ -104,33 +103,116 @@ public partial class WorldController : Node2D
 			return;
 		}
 
+		if (dialogueUi != null && dialogueUi.Visible)
+		{
+			player.InputLocked = true;
+			if (Input.IsActionJustPressed("interact"))
+			{
+				dialogueUi.Close();
+			}
+			UpdatePrompt();
+			return;
+		}
+
 		player.InputLocked = false;
-		HandleWorldChoices();
+		HandleInteractions();
 		HandleScalingHazards((float)delta);
 		HandleToxicAreas();
 		UpdatePrompt();
 	}
 
-	private void HandleWorldChoices()
+	private Interactable? GetInteractableInRange()
+	{
+		if (player == null)
+		{
+			return null;
+		}
+
+		Interactable? nearest = null;
+		float nearestDistance = float.MaxValue;
+
+		foreach (Node node in GetTree().GetNodesInGroup("interactables"))
+		{
+			if (node is not Interactable interactable || !IsInstanceValid(interactable) || !interactable.Visible)
+			{
+				continue;
+			}
+
+			float distance = player.GlobalPosition.DistanceTo(interactable.GlobalPosition);
+			if (distance <= interactable.Radius && distance < nearestDistance)
+			{
+				nearest = interactable;
+				nearestDistance = distance;
+			}
+		}
+
+		return nearest;
+	}
+
+	private void HandleInteractions()
+	{
+		if (player == null || riftActive || !Input.IsActionJustPressed("interact"))
+		{
+			return;
+		}
+
+		Interactable? target = GetInteractableInRange();
+		if (target != null)
+		{
+			Interact(target);
+		}
+	}
+
+	private void Interact(Interactable target)
 	{
 		if (player == null)
 		{
 			return;
 		}
 
-		if (!riftActive && boardMarker != null && Input.IsActionJustPressed("help_village") && player.GlobalPosition.DistanceTo(boardMarker.GlobalPosition) < BoardInteractionRadius && !intermissionChoiceUsed)
+		switch (target.Kind)
 		{
-			intermissionChoiceUsed = true;
-			currentTier += 1;
-			player.GainReputation(15);
-			player.HealFull();
-			player.SetLastTreeMessage("You helped the village, but the rift grew stronger while you were away.");
+			case InteractableKind.Portal:
+				StartNextRift();
+				break;
+			case InteractableKind.Board:
+				player.SetLastTreeMessage(BuildBoardText());
+				break;
+			case InteractableKind.Station:
+				if (target.HealsPlayer)
+				{
+					player.HealFull();
+					player.SetLastTreeMessage("You rest at the " + target.DisplayName + " and recover fully.");
+				}
+				else
+				{
+					player.SetLastTreeMessage(string.IsNullOrEmpty(target.FlavorText)
+						? "The " + target.DisplayName + " is not ready for use yet."
+						: target.FlavorText);
+				}
+				break;
+			case InteractableKind.Npc:
+				dialogueUi?.Open(target);
+				if (dialogueUi != null)
+				{
+					player.InputLocked = true;
+				}
+				break;
+		}
+	}
+
+	private string BuildBoardText()
+	{
+		if (player == null)
+		{
+			return "";
 		}
 
-		if (!riftActive && portalMarker != null && Input.IsActionJustPressed("next_rift") && player.GlobalPosition.DistanceTo(portalMarker.GlobalPosition) < PortalInteractionRadius)
-		{
-			StartNextRift();
-		}
+		return "Village Notice Board — Reputation " + player.Reputation +
+			"\nVillagers: " + Factions.GetStanding(Faction.Villagers, player.Reputation) +
+			"  Order: " + Factions.GetStanding(Faction.Order, player.Reputation) +
+			"  Outcasts: " + Factions.GetStanding(Faction.Outcasts, player.Reputation) +
+			"\nClear rifts to earn the village's trust.";
 	}
 
 	private void HandleScalingHazards(float delta)
@@ -196,6 +278,11 @@ public partial class WorldController : Node2D
 		projectileEnemies.Clear();
 		acidEnemies.Clear();
 
+		if (!riftEventFired)
+		{
+			TriggerRiftEvent();
+		}
+
 		int enemyCount = 3 + currentTier;
 		for (int index = 0; index < enemyCount; index++)
 		{
@@ -216,6 +303,30 @@ public partial class WorldController : Node2D
 			: "Rift tier " + currentTier + " started.");
 	}
 
+	// One-time scripted set-dressing: when the rift first opens, designated houses
+	// swap their "Intact" child for their "Broken" child. Authored per-house, not simulated.
+	private void TriggerRiftEvent()
+	{
+		riftEventFired = true;
+		if (housesRoot == null)
+		{
+			return;
+		}
+
+		foreach (Node child in housesRoot.GetChildren())
+		{
+			Node? intact = child.GetNodeOrNull("Intact");
+			Node? broken = child.GetNodeOrNull("Broken");
+			if (intact is CanvasItem intactVisual && broken is CanvasItem brokenVisual)
+			{
+				intactVisual.Visible = false;
+				brokenVisual.Visible = true;
+			}
+		}
+
+		player?.SetLastTreeMessage("A rift tears open in the village. Nearby houses collapse — including hers.");
+	}
+
 	private void OnEnemyKilled(Enemy enemy)
 	{
 		if (player == null)
@@ -233,12 +344,12 @@ public partial class WorldController : Node2D
 		livingEnemies.Remove(enemy);
 		player.GainXp(8 + currentTier * 2);
 		player.GainMagicStones(1);
+		player.GainReputation(2 + (enemy.IsElite ? 3 : 0));
 
 		if (livingEnemies.Count == 0)
 		{
 			riftActive = false;
-			intermissionChoiceUsed = false;
-			player.SetLastTreeMessage("Rift tier cleared. Use B to unlock more power, H to help the village, or N for the next tier.");
+			player.SetLastTreeMessage("Rift tier cleared. Press B to unlock power, or find the rift gate for the next tier.");
 			currentTier += 1;
 		}
 	}
@@ -351,16 +462,20 @@ public partial class WorldController : Node2D
 			return;
 		}
 
-		if (!riftActive && boardMarker != null && player.GlobalPosition.DistanceTo(boardMarker.GlobalPosition) < BoardInteractionRadius && !intermissionChoiceUsed)
+		if (dialogueUi != null && dialogueUi.Visible)
 		{
-			worldPrompt.Text = "Meaningful choice: [H] help the village for reputation, but skip ahead to a stronger rift tier.";
+			worldPrompt.Text = "Press [F] to leave the conversation.";
 			return;
 		}
 
-		if (!riftActive && portalMarker != null && player.GlobalPosition.DistanceTo(portalMarker.GlobalPosition) < PortalInteractionRadius)
+		if (!riftActive)
 		{
-			worldPrompt.Text = "Meaningful choice: [N] enter the rift for XP and magic stones.";
-			return;
+			Interactable? target = GetInteractableInRange();
+			if (target != null)
+			{
+				worldPrompt.Text = target.GetPrompt();
+				return;
+			}
 		}
 
 		if (currentTier >= 2)

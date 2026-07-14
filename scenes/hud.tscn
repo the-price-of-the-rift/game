@@ -14,7 +14,7 @@ ShieldFillPath = NodePath("ShieldFill")
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 218.0
-offset_bottom = 94.0
+offset_bottom = 108.0
 color = Color(0.06, 0.08, 0.1, 0.74)
 
 [node name="HealthBack" type="ColorRect" parent="."]
@@ -49,7 +49,7 @@ color = Color(0.38, 0.75, 0.95, 1)
 offset_left = 18.0
 offset_top = 46.0
 offset_right = 208.0
-offset_bottom = 88.0
+offset_bottom = 104.0
 theme_override_font_sizes/font_size = 10
 
 [node name="LoadoutLabel" type="Label" parent="."]
