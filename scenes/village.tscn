@@ -251,6 +251,29 @@ theme_override_font_sizes/font_size = 10
 text = "Ragged Hann"
 horizontal_alignment = 1
 
+[node name="Weller" type="Node2D" parent="Npcs"]
+position = Vector2(280, 200)
+script = ExtResource("8_interact")
+Kind = 3
+Radius = 40.0
+DisplayName = "Weller"
+Faction = 0
+IsStoneTrader = true
+FlavorText = "Coin talks louder than crowns, reeve."
+
+[node name="Body" type="Polygon2D" parent="Npcs/Weller"]
+color = Color(0.75, 0.65, 0.25, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/Weller"]
+offset_left = -40.0
+offset_top = -32.0
+offset_right = 40.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Weller"
+horizontal_alignment = 1
+
 [node name="Houses" type="Node2D" parent="." unique_id=330636391]
 
 [node name="GirlHouse" type="Node2D" parent="Houses" unique_id=578066236]

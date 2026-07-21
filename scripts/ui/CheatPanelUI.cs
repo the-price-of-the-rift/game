@@ -15,6 +15,7 @@ public partial class CheatPanelUI : CanvasLayer
 	[Export] public NodePath AddReputationButtonPath { get; set; } = new NodePath();
 	[Export] public NodePath FullHealButtonPath { get; set; } = new NodePath();
 	[Export] public NodePath ImmortalityButtonPath { get; set; } = new NodePath();
+	[Export] public NodePath AddMoneyButtonPath { get; set; } = new NodePath();
 	[Export] public NodePath CloseButtonPath { get; set; } = new NodePath();
 
 	private Player? player;
@@ -34,6 +35,7 @@ public partial class CheatPanelUI : CanvasLayer
 		Button? addStonesButton = GetNodeOrNull<Button>(AddStonesButtonPath);
 		Button? addReputationButton = GetNodeOrNull<Button>(AddReputationButtonPath);
 		Button? fullHealButton = GetNodeOrNull<Button>(FullHealButtonPath);
+		Button? addMoneyButton = GetNodeOrNull<Button>(AddMoneyButtonPath);
 		Button? closeButton = GetNodeOrNull<Button>(CloseButtonPath);
 
 		if (completeRiftButton != null)
@@ -59,6 +61,10 @@ public partial class CheatPanelUI : CanvasLayer
 		if (fullHealButton != null)
 		{
 			fullHealButton.Pressed += OnFullHeal;
+		}
+		if (addMoneyButton != null)
+		{
+			addMoneyButton.Pressed += OnAddMoney;
 		}
 		if (immortalityButton != null)
 		{
@@ -119,6 +125,11 @@ public partial class CheatPanelUI : CanvasLayer
 		player?.HealFull();
 	}
 
+	private void OnAddMoney()
+	{
+		player?.GainMoney(50);
+	}
+
 	private void OnToggleImmortality()
 	{
 		if (player == null)
@@ -141,7 +152,7 @@ public partial class CheatPanelUI : CanvasLayer
 		{
 			statusLabel.Text =
 				"Level " + player.Level + "  XP " + player.Xp +
-				"  Rep " + player.Reputation + "  Stones " + player.MagicStones +
+				"  Rep " + player.Reputation + "  Stones " + player.MagicStones + "  Coin " + player.Money +
 				"\nHP " + player.CurrentHealth.ToString("0") + "/" + player.MaxHealth.ToString("0") +
 				"  Rift Tier " + (world?.CurrentTier ?? 1) +
 				"\nImmortality: " + (player.IsImmortal ? "ON" : "OFF");

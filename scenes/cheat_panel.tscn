@@ -20,6 +20,7 @@ AddStonesButtonPath = NodePath("Panel/AddStonesButton")
 AddReputationButtonPath = NodePath("Panel/AddReputationButton")
 FullHealButtonPath = NodePath("Panel/FullHealButton")
 ImmortalityButtonPath = NodePath("Panel/ImmortalityButton")
+AddMoneyButtonPath = NodePath("Panel/AddMoneyButton")
 CloseButtonPath = NodePath("Panel/CloseButton")
 
 [node name="Backdrop" type="ColorRect" parent="."]
@@ -32,7 +33,7 @@ color = Color(0.02, 0.02, 0.04, 0.82)
 offset_left = 40.0
 offset_top = 20.0
 offset_right = 600.0
-offset_bottom = 250.0
+offset_bottom = 282.0
 color = Color(0.05, 0.05, 0.08, 0.92)
 
 [node name="TitleLabel" type="Label" parent="Panel"]
@@ -114,11 +115,20 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
 theme_override_font_sizes/font_size = 10
 text = "Immortality: OFF"
 
-[node name="CloseButton" type="Button" parent="Panel"]
+[node name="AddMoneyButton" type="Button" parent="Panel"]
 offset_left = 10.0
 offset_top = 212.0
 offset_right = 550.0
 offset_bottom = 238.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "+50 Money"
+
+[node name="CloseButton" type="Button" parent="Panel"]
+offset_left = 10.0
+offset_top = 246.0
+offset_right = 550.0
+offset_bottom = 272.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
 theme_override_font_sizes/font_size = 10
 text = "Close"

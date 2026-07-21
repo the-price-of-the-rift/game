@@ -20,14 +20,19 @@ public enum Standing
 // Villagers warm up earlier. No per-faction bookkeeping.
 public static class Factions
 {
-	public static Standing GetStanding(Faction faction, int reputation)
+	public static (int Neutral, int Friendly) GetThresholds(Faction faction)
 	{
-		(int neutral, int friendly) = faction switch
+		return faction switch
 		{
 			Faction.Kings => (20, 50),
 			Faction.Villagers => (10, 30),
 			_ => (10, 30),
 		};
+	}
+
+	public static Standing GetStanding(Faction faction, int reputation)
+	{
+		(int neutral, int friendly) = GetThresholds(faction);
 
 		if (reputation >= friendly)
 		{

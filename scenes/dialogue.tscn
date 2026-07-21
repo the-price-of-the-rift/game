@@ -15,6 +15,9 @@ script = ExtResource("1")
 NameLabelPath = NodePath("Panel/NameLabel")
 BodyLabelPath = NodePath("Panel/BodyLabel")
 LearnButtonPath = NodePath("Panel/LearnButton")
+TradeButtonPath = NodePath("Panel/TradeButton")
+TradeTenButtonPath = NodePath("Panel/TradeTenButton")
+TradeAllButtonPath = NodePath("Panel/TradeAllButton")
 LeaveButtonPath = NodePath("Panel/LeaveButton")
 
 [node name="Panel" type="ColorRect" parent="."]
@@ -44,16 +47,43 @@ autowrap_mode = 3
 [node name="LearnButton" type="Button" parent="Panel"]
 offset_left = 10.0
 offset_top = 114.0
-offset_right = 110.0
+offset_right = 150.0
 offset_bottom = 136.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_gray")
 theme_override_font_sizes/font_size = 10
 text = "Learn"
 
-[node name="LeaveButton" type="Button" parent="Panel"]
-offset_left = 120.0
+[node name="TradeButton" type="Button" parent="Panel"]
+offset_left = 10.0
 offset_top = 114.0
-offset_right = 220.0
+offset_right = 150.0
+offset_bottom = 136.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_gray")
+theme_override_font_sizes/font_size = 10
+text = "Trade 1 stone"
+
+[node name="TradeTenButton" type="Button" parent="Panel"]
+offset_left = 160.0
+offset_top = 114.0
+offset_right = 300.0
+offset_bottom = 136.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_gray")
+theme_override_font_sizes/font_size = 10
+text = "Trade 10 stones"
+
+[node name="TradeAllButton" type="Button" parent="Panel"]
+offset_left = 310.0
+offset_top = 114.0
+offset_right = 450.0
+offset_bottom = 136.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_gray")
+theme_override_font_sizes/font_size = 10
+text = "Trade all stones"
+
+[node name="LeaveButton" type="Button" parent="Panel"]
+offset_left = 460.0
+offset_top = 114.0
+offset_right = 600.0
 offset_bottom = 136.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_gray")
 theme_override_font_sizes/font_size = 10

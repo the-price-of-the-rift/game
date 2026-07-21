@@ -28,6 +28,7 @@ public partial class Interactable : Node2D
 	[Export] public Faction Faction { get; set; } = Faction.Villagers;
 	[Export] public bool IsTeacher { get; set; } = false;
 	[Export] public string TeachAbilityId { get; set; } = "";
+	[Export] public bool IsStoneTrader { get; set; } = false;
 
 	// Teacher only: the branch this guardian trains. Progressive teaching grants the
 	// next unlearned active in this branch whose prerequisites are met.

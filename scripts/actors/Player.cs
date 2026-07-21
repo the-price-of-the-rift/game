@@ -20,6 +20,14 @@ public partial class Player : CharacterBody2D
 	public int Xp { get; private set; } = 0;
 	public int Reputation { get; private set; } = 12;
 	public int MagicStones { get; private set; } = 3;
+	public int Money { get; private set; } = 0;
+
+	// Base price: 1 magic stone = 5 money, chaining the anchor doc's "1 stone = 1
+	// HP-equivalent" and "1 HP = 5 money" ratios. Selling is irreversible - no buy-back.
+	// Actual price scales up with Villagers reputation past their Neutral threshold - see
+	// GetMagicStonePrice and docs/progression-builds-variables.md.
+	public const int MoneyPerMagicStone = 5;
+	private const float MagicStonePriceBonusPerReputation = 0.02f;
 	public float CurrentHealth => currentHealth;
 	public float MaxHealth => maxHealth;
 	public float CurrentShield => currentShield;
@@ -378,6 +386,45 @@ public partial class Player : CharacterBody2D
 	{
 		MagicStones += amount;
 		EmitSignal(SignalName.StatsChanged);
+	}
+
+	public void GainMoney(int amount)
+	{
+		Money += amount;
+		EmitSignal(SignalName.StatsChanged);
+	}
+
+	// Price rises with Villagers reputation past their Neutral threshold: +2% per
+	// reputation point above it. A player who just reached Neutral standing (the earliest
+	// point a hostile Weller would even talk) pays exactly MoneyPerMagicStone; better
+	// standing with the village is rewarded with a better rate.
+	public int GetMagicStonePrice()
+	{
+		int neutralThreshold = Factions.GetThresholds(Faction.Villagers).Neutral;
+		float multiplier = 1.0f + Mathf.Max(0, Reputation - neutralThreshold) * MagicStonePriceBonusPerReputation;
+		return Mathf.Max(1, Mathf.RoundToInt(MoneyPerMagicStone * multiplier));
+	}
+
+	// Sells up to `count` stones at once, at the current reputation-based price per stone.
+	// Irreversible - there is no way to buy sold stones back. Returns the number actually
+	// sold (0 if the player had none), so callers can tell whether the trade happened.
+	public int SellMagicStones(int count)
+	{
+		int sold = Mathf.Min(count, MagicStones);
+		if (sold <= 0)
+		{
+			return 0;
+		}
+
+		MagicStones -= sold;
+		Money += sold * GetMagicStonePrice();
+		EmitSignal(SignalName.StatsChanged);
+		return sold;
+	}
+
+	public bool SellOneMagicStone()
+	{
+		return SellMagicStones(1) > 0;
 	}
 
 	public void GainReputation(int amount)

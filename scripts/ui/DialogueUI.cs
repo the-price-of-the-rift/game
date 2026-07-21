@@ -10,12 +10,20 @@ public partial class DialogueUI : CanvasLayer
 	[Export] public NodePath NameLabelPath { get; set; } = new NodePath();
 	[Export] public NodePath BodyLabelPath { get; set; } = new NodePath();
 	[Export] public NodePath LearnButtonPath { get; set; } = new NodePath();
+	[Export] public NodePath TradeButtonPath { get; set; } = new NodePath();
+	[Export] public NodePath TradeTenButtonPath { get; set; } = new NodePath();
+	[Export] public NodePath TradeAllButtonPath { get; set; } = new NodePath();
 	[Export] public NodePath LeaveButtonPath { get; set; } = new NodePath();
+
+	private const int TradeTenCount = 10;
 
 	private Player? player;
 	private Label? nameLabel;
 	private RichTextLabel? bodyLabel;
 	private Button? learnButton;
+	private Button? tradeButton;
+	private Button? tradeTenButton;
+	private Button? tradeAllButton;
 	private Button? leaveButton;
 	private string pendingAbilityId = "";
 
@@ -25,11 +33,26 @@ public partial class DialogueUI : CanvasLayer
 		nameLabel = GetNodeOrNull<Label>(NameLabelPath);
 		bodyLabel = GetNodeOrNull<RichTextLabel>(BodyLabelPath);
 		learnButton = GetNodeOrNull<Button>(LearnButtonPath);
+		tradeButton = GetNodeOrNull<Button>(TradeButtonPath);
+		tradeTenButton = GetNodeOrNull<Button>(TradeTenButtonPath);
+		tradeAllButton = GetNodeOrNull<Button>(TradeAllButtonPath);
 		leaveButton = GetNodeOrNull<Button>(LeaveButtonPath);
 
 		if (learnButton != null)
 		{
 			learnButton.Pressed += OnLearnPressed;
+		}
+		if (tradeButton != null)
+		{
+			tradeButton.Pressed += OnTradePressed;
+		}
+		if (tradeTenButton != null)
+		{
+			tradeTenButton.Pressed += OnTradeTenPressed;
+		}
+		if (tradeAllButton != null)
+		{
+			tradeAllButton.Pressed += OnTradeAllPressed;
 		}
 		if (leaveButton != null)
 		{
@@ -57,10 +80,16 @@ public partial class DialogueUI : CanvasLayer
 
 		pendingAbilityId = "";
 		bool offerTeach = false;
+		bool offerTrade = false;
 
 		if (standing == Standing.Hostile)
 		{
 			SetBody(FormatSpeech(HostileLine(npc.Faction)));
+		}
+		else if (npc.IsStoneTrader)
+		{
+			offerTrade = true;
+			SetBody(FormatSpeech(TradeOfferLine(player)));
 		}
 		else if (npc.IsTeacher && npc.Faction == Faction.Kings && standing == Standing.Friendly && npc.TeachBranch != BuildBranch.None)
 		{
@@ -99,6 +128,24 @@ public partial class DialogueUI : CanvasLayer
 			learnButton.Disabled = !offerTeach;
 		}
 
+		if (tradeButton != null)
+		{
+			tradeButton.Visible = offerTrade;
+			tradeButton.Disabled = !offerTrade || player.MagicStones <= 0;
+		}
+
+		if (tradeTenButton != null)
+		{
+			tradeTenButton.Visible = offerTrade;
+			tradeTenButton.Disabled = !offerTrade || player.MagicStones < TradeTenCount;
+		}
+
+		if (tradeAllButton != null)
+		{
+			tradeAllButton.Visible = offerTrade;
+			tradeAllButton.Disabled = !offerTrade || player.MagicStones <= 0;
+		}
+
 		Visible = true;
 	}
 
@@ -131,6 +178,65 @@ public partial class DialogueUI : CanvasLayer
 			learnButton.Visible = false;
 			learnButton.Disabled = true;
 		}
+	}
+
+	private void OnTradePressed()
+	{
+		HandleTrade(1);
+	}
+
+	private void OnTradeTenPressed()
+	{
+		HandleTrade(TradeTenCount);
+	}
+
+	private void OnTradeAllPressed()
+	{
+		if (player != null)
+		{
+			HandleTrade(player.MagicStones);
+		}
+	}
+
+	private void HandleTrade(int count)
+	{
+		if (player == null)
+		{
+			return;
+		}
+
+		if (player.SellMagicStones(count) > 0)
+		{
+			SetBody(FormatSpeech(TradeOfferLine(player)));
+		}
+		else
+		{
+			SetBody(FormatSpeech("You have no magic stones left to trade."));
+		}
+
+		if (tradeButton != null)
+		{
+			tradeButton.Disabled = player.MagicStones <= 0;
+		}
+		if (tradeTenButton != null)
+		{
+			tradeTenButton.Disabled = player.MagicStones < TradeTenCount;
+		}
+		if (tradeAllButton != null)
+		{
+			tradeAllButton.Disabled = player.MagicStones <= 0;
+		}
+	}
+
+	private static string TradeOfferLine(Player player)
+	{
+		if (player.MagicStones <= 0)
+		{
+			return "No stones on you? Clear a rift and come back - I'll always be here.";
+		}
+
+		return player.GetMagicStonePrice() + " coin a stone, and it's gone for good - no buying it back. " +
+			"You are holding " + player.MagicStones + " stone(s) and " + player.Money + " coin.";
 	}
 
 	private void SetBody(string text)
