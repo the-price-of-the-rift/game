@@ -66,6 +66,7 @@ public partial class MainController : Node2D
 		treeUi?.Bind(player);
 		dialogueUi?.Bind(player);
 		cheatPanel?.Bind(player, this);
+		shopUi?.Bind(player);
 
 		SwapToVillage();
 	}

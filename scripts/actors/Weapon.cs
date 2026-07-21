@@ -7,6 +7,12 @@ public partial class Weapon : Node2D
 	[Export] public NodePath WarriorVisualPath { get; set; } = new NodePath();
 	[Export] public NodePath RangerVisualPath { get; set; } = new NodePath();
 	[Export] public NodePath ScoutVisualPath { get; set; } = new NodePath();
+	// Each branch's single dominant shape (the blade / bow arc / dagger polygon) - the
+	// part that gets reshaped per equipped weapon. Everything else in the visual (guard,
+	// bowstring, handle) stays fixed, so a weapon swap only needs to touch one polygon.
+	[Export] public NodePath WarriorBladePath { get; set; } = new NodePath();
+	[Export] public NodePath RangerBowArcPath { get; set; } = new NodePath();
+	[Export] public NodePath ScoutDaggerPath { get; set; } = new NodePath();
 	[Export] public float LightSwingAngleDegrees { get; set; } = 28.0f;
 	[Export] public float HeavySwingAngleDegrees { get; set; } = 46.0f;
 	[Export] public float SwingSpeed { get; set; } = 4.5f;
@@ -19,6 +25,9 @@ public partial class Weapon : Node2D
 	private Node2D? rangerVisual;
 	private Node2D? scoutVisual;
 	private Node2D? activeVisual;
+	private Polygon2D? warriorBlade;
+	private Polygon2D? rangerBowArc;
+	private Polygon2D? scoutDagger;
 	private float swingTimer = 0.0f;
 	private float swingAngleRadians = 0.0f;
 	private float flashTimer = 0.0f;
@@ -28,6 +37,9 @@ public partial class Weapon : Node2D
 		warriorVisual = GetNodeOrNull<Node2D>(WarriorVisualPath);
 		rangerVisual = GetNodeOrNull<Node2D>(RangerVisualPath);
 		scoutVisual = GetNodeOrNull<Node2D>(ScoutVisualPath);
+		warriorBlade = GetNodeOrNull<Polygon2D>(WarriorBladePath);
+		rangerBowArc = GetNodeOrNull<Polygon2D>(RangerBowArcPath);
+		scoutDagger = GetNodeOrNull<Polygon2D>(ScoutDaggerPath);
 		ApplyBranchVisual();
 	}
 
@@ -56,6 +68,38 @@ public partial class Weapon : Node2D
 	{
 		flashTimer = HitFlashDuration;
 		UpdateVisualPose();
+	}
+
+	// Recolors the equipped weapon's idle tint (a blacksmith purchase) and refreshes the
+	// visual immediately instead of waiting for the next _Process tick.
+	public void SetIdleColor(Color color)
+	{
+		IdleColor = color;
+		UpdateVisualPose();
+	}
+
+	// Reshapes the given branch's dominant polygon to a purchased weapon's silhouette
+	// (e.g. a slim sword blade vs. a flared axe head). No-op if the shape is empty, so
+	// callers can pass WeaponDefinition.ShapePoints without checking branch support.
+	public void SetShape(BuildBranch forBranch, Vector2[] points)
+	{
+		if (points.Length == 0)
+		{
+			return;
+		}
+
+		Polygon2D? target = forBranch switch
+		{
+			BuildBranch.Warrior => warriorBlade,
+			BuildBranch.Ranger => rangerBowArc,
+			BuildBranch.Scout => scoutDagger,
+			_ => null,
+		};
+
+		if (target != null)
+		{
+			target.Polygon = points;
+		}
 	}
 
 	private void ApplyBranchVisual()

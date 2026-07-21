@@ -17,8 +17,10 @@ public partial class Enemy : CharacterBody2D
 	public bool IsElite { get; private set; } = false;
 	public bool IsDead => currentHealth <= 0.0f;
 	public bool IsScoutDebuffed => scoutDebuffTimer > 0.0f;
+	public bool IsStunned => stunTimer > 0.0f;
 
 	private float currentHealth;
+	private float stunTimer = 0.0f;
 	private float baseMoveSpeed;
 	private float baseAttackCooldown;
 	private float attackTimer = 0.0f;
@@ -89,6 +91,14 @@ public partial class Enemy : CharacterBody2D
 			}
 		}
 
+		if (stunTimer > 0.0f)
+		{
+			stunTimer -= (float)delta;
+			Velocity = Vector2.Zero;
+			MoveAndSlide();
+			return;
+		}
+
 		Vector2 toPlayer = player.GlobalPosition - GlobalPosition;
 		float distance = toPlayer.Length();
 		Velocity = distance > AttackRange ? toPlayer.Normalized() * GetCurrentMoveSpeed() : Vector2.Zero;
@@ -116,6 +126,18 @@ public partial class Enemy : CharacterBody2D
 		scoutPoisonTickInterval = poisonInterval;
 		scoutDebuffTimer = Mathf.Max(scoutDebuffTimer, duration);
 		scoutPoisonTimer = Mathf.Min(scoutPoisonTimer <= 0.0f ? poisonInterval : scoutPoisonTimer, poisonInterval);
+	}
+
+	// The Axe's on-hit effect: freezes movement and attacks for `duration` seconds.
+	// Stacks by taking the longer of the current and new duration, not adding them.
+	public void ApplyStun(float duration)
+	{
+		if (IsDead)
+		{
+			return;
+		}
+
+		stunTimer = Mathf.Max(stunTimer, duration);
 	}
 
 	public bool CanUseRangedAttack()

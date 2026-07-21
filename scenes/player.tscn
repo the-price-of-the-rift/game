@@ -35,6 +35,9 @@ script = ExtResource("3")
 WarriorVisualPath = NodePath("WarriorVisual")
 RangerVisualPath = NodePath("RangerVisual")
 ScoutVisualPath = NodePath("ScoutVisual")
+WarriorBladePath = NodePath("WarriorVisual/Blade")
+RangerBowArcPath = NodePath("RangerVisual/BowArc")
+ScoutDaggerPath = NodePath("ScoutVisual/Dagger")
 
 [node name="WarriorVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=603526110]
 position = Vector2(5, 0)

@@ -69,7 +69,7 @@ public partial class DialogueUI : CanvasLayer
 		{
 			tradeTenButton.Pressed += OnTradeTenPressed;
 		}
-		if (tradeAllButton != null)3
+		if (tradeAllButton != null)
 		{
 			tradeAllButton.Pressed += OnTradeAllPressed;
 		}

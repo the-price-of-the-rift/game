@@ -22,6 +22,7 @@ public partial class Player : CharacterBody2D
 	public int MagicStones { get; private set; } = 3;
 	public int Money { get; private set; } = 0;
 	public int Potions { get; private set; } = 0;
+	public string EquippedWeaponId { get; private set; } = "";
 
 	// Base price: 1 magic stone = 5 money, chaining the anchor doc's "1 stone = 1
 	// HP-equivalent" and "1 HP = 5 money" ratios. Selling is irreversible - no buy-back.
@@ -29,6 +30,11 @@ public partial class Player : CharacterBody2D
 	// GetMagicStonePrice and docs/progression-builds-variables.md.
 	public const int MoneyPerMagicStone = 5;
 	private const float MagicStonePriceBonusPerReputation = 0.02f;
+	// The blacksmith is part of the village: hostile villagers mark weapon prices up,
+	// friendly ones discount them. See GetWeaponPrice.
+	private const float WeaponPriceHostileMarkup = 1.25f;
+	private const float WeaponPriceDiscountPerReputation = 0.01f;
+	private const float WeaponPriceMinMultiplier = 0.5f;
 	public float CurrentHealth => currentHealth;
 	public float MaxHealth => maxHealth;
 	public float CurrentShield => currentShield;
@@ -52,6 +58,9 @@ public partial class Player : CharacterBody2D
 	private const float DashDuration = 0.18f;
 	private const float DashDistance = 148.0f;
 	private const float DashHitRadius = 24.0f;
+	// Dash Hit/Enemy Crash bonus against a target currently slowed by the player's own
+	// Poison Darts - the payoff for the kite-then-finish Scout loop.
+	private const float DashSlowedTargetBonus = 1.3f;
 	private const float PotionHealAmount = 30.0f;
 
 	// Leveling is uncapped (see BalanceCurves): levels 2 and 3 still grant the designed
@@ -68,6 +77,7 @@ public partial class Player : CharacterBody2D
 	// Names of villagers whose one-time tax has already been collected (persists across
 	// village <-> rift trips, since the village scene is re-instantiated each time).
 	private readonly HashSet<string> collectedTaxes = new();
+	private readonly HashSet<string> ownedWeaponIds = new();
 
 	private Sprite2D? sprite;
 	private Weapon? weapon;
@@ -87,6 +97,14 @@ public partial class Player : CharacterBody2D
 	private float dashTimer = 0.0f;
 	private float dashDamage = 0.0f;
 	private Vector2 dashDirection = Vector2.Zero;
+	private float weaponDamageMultiplier = 1.0f;
+	private float weaponAttackSpeedMultiplier = 1.0f;
+	private float weaponCritChanceBonus = 0.0f;
+	private float weaponStunChance = 0.0f;
+	private float weaponStunDuration = 0.0f;
+	private float weaponMeleeRangeBonus = 0.0f;
+	private bool weaponPoisonOnHit = false;
+	private bool weaponSlowOnHit = false;
 
 	public override void _Ready()
 	{
@@ -112,6 +130,10 @@ public partial class Player : CharacterBody2D
 			if (Input.IsActionJustPressed("use_potion"))
 			{
 				UsePotion();
+			}
+			if (Input.IsActionJustPressed("cycle_weapon"))
+			{
+				CycleWeapon();
 			}
 		}
 
@@ -281,6 +303,7 @@ public partial class Player : CharacterBody2D
 		if (ChosenBranch == BuildBranch.None && definition.Branch != BuildBranch.None)
 		{
 			ChosenBranch = definition.Branch;
+			GrantStartingWeapon(ChosenBranch);
 		}
 
 		RefreshStats();
@@ -414,6 +437,23 @@ public partial class Player : CharacterBody2D
 		return Mathf.Max(1, Mathf.RoundToInt(MoneyPerMagicStone * multiplier));
 	}
 
+	// Blacksmith price for a weapon, scaled by standing with the Villagers (per docs 4.6:
+	// hostile NPCs charge more, friendly ones may discount). Hostile standing adds a flat
+	// 25% markup; at or above Neutral the price instead drops 1% per reputation point past
+	// the Neutral threshold, floored at half price so it never goes to (near-)free.
+	public int GetWeaponPrice(WeaponDefinition definition)
+	{
+		if (Factions.GetStanding(Faction.Villagers, Reputation) == Standing.Hostile)
+		{
+			return Mathf.Max(1, Mathf.RoundToInt(definition.Price * WeaponPriceHostileMarkup));
+		}
+
+		int neutralThreshold = Factions.GetThresholds(Faction.Villagers).Neutral;
+		float discount = Mathf.Max(0, Reputation - neutralThreshold) * WeaponPriceDiscountPerReputation;
+		float multiplier = Mathf.Max(WeaponPriceMinMultiplier, 1.0f - discount);
+		return Mathf.Max(1, Mathf.RoundToInt(definition.Price * multiplier));
+	}
+
 	// Sells up to `count` stones at once, at the current reputation-based price per stone.
 	// Irreversible - there is no way to buy sold stones back. Returns the number actually
 	// sold (0 if the player had none), so callers can tell whether the trade happened.
@@ -460,6 +500,127 @@ public partial class Player : CharacterBody2D
 	{
 		Potions += amount;
 		EmitSignal(SignalName.StatsChanged);
+	}
+
+	public IReadOnlyCollection<string> OwnedWeaponIds => ownedWeaponIds;
+
+	public bool OwnsWeapon(string weaponId)
+	{
+		return ownedWeaponIds.Contains(weaponId);
+	}
+
+	// Buys a blacksmith weapon the first time (requires matching the player's committed
+	// branch and enough coin) and equips it. Already-owned weapons re-equip for free -
+	// purchases are kept forever, so switching back to something you bought earlier never
+	// costs coin twice. See CycleWeapon for switching between owned weapons with [Z].
+	public bool BuyWeapon(string weaponId)
+	{
+		if (!WeaponDefinitions.All.TryGetValue(weaponId, out WeaponDefinition? definition))
+		{
+			return false;
+		}
+
+		if (definition.Branch != ChosenBranch)
+		{
+			LastTreeMessage = "That weapon is not made for your class.";
+			EmitSignal(SignalName.StatsChanged);
+			return false;
+		}
+
+		if (ownedWeaponIds.Contains(weaponId))
+		{
+			EquipWeapon(definition);
+			LastTreeMessage = "You already own the " + definition.DisplayName + ". Switched to it.";
+			EmitSignal(SignalName.StatsChanged);
+			return true;
+		}
+
+		int price = GetWeaponPrice(definition);
+		if (!SpendMoney(price))
+		{
+			LastTreeMessage = "Need " + price + " coin for the " + definition.DisplayName + ".";
+			EmitSignal(SignalName.StatsChanged);
+			return false;
+		}
+
+		ownedWeaponIds.Add(weaponId);
+		EquipWeapon(definition);
+		LastTreeMessage = "Bought and equipped the " + definition.DisplayName + ".";
+		EmitSignal(SignalName.StatsChanged);
+		return true;
+	}
+
+	// Switches to the next owned weapon in the class's shop order (wraps around). Bound to
+	// [Z] both in the shop (ShopUI) and during normal gameplay (here), so a player who has
+	// bought e.g. both Sword and Axe can swap between them mid-fight without a trip back to
+	// the blacksmith. Only cycles through weapons already bought - never spends coin. No-op
+	// with a status message when nothing has been bought yet or no branch is chosen.
+	public bool CycleWeapon()
+	{
+		if (ChosenBranch == BuildBranch.None)
+		{
+			return false;
+		}
+
+		IReadOnlyList<string> classWeaponIds = WeaponDefinitions.GetForBranch(ChosenBranch);
+		List<string> owned = new();
+		foreach (string id in classWeaponIds)
+		{
+			if (ownedWeaponIds.Contains(id))
+			{
+				owned.Add(id);
+			}
+		}
+
+		if (owned.Count == 0)
+		{
+			LastTreeMessage = "You have not bought a weapon from the smith yet.";
+			EmitSignal(SignalName.StatsChanged);
+			return false;
+		}
+
+		int currentIndex = owned.IndexOf(EquippedWeaponId);
+		string nextId = owned[(currentIndex + 1) % owned.Count];
+		EquipWeapon(WeaponDefinitions.All[nextId]);
+		LastTreeMessage = "Switched to the " + WeaponDefinitions.All[nextId].DisplayName + ".";
+		EmitSignal(SignalName.StatsChanged);
+		return true;
+	}
+
+	private void EquipWeapon(WeaponDefinition definition)
+	{
+		EquippedWeaponId = definition.Id;
+		weaponDamageMultiplier = definition.DamageMultiplier;
+		weaponAttackSpeedMultiplier = definition.AttackSpeedMultiplier;
+		weaponCritChanceBonus = definition.CritChanceBonus;
+		weaponStunChance = definition.StunChance;
+		weaponStunDuration = definition.StunDuration;
+		weaponMeleeRangeBonus = definition.MeleeRangeBonus;
+		weaponPoisonOnHit = definition.PoisonOnHit;
+		weaponSlowOnHit = definition.SlowOnHit;
+		weapon?.SetIdleColor(definition.Tint);
+		weapon?.SetShape(definition.Branch, definition.ShapePoints);
+	}
+
+	// Called once, the moment a King's guardian commits the player to a branch: grants
+	// and equips that class's first shop weapon (Sword/Bow/Daggers - the neutral-stat
+	// entry every class's Player.RefreshStats/GetXDamage numbers were already tuned
+	// against) for free, so it counts as "owned" and CycleWeapon/[Z] can switch back to
+	// it after later blacksmith purchases instead of only cycling paid weapons.
+	private void GrantStartingWeapon(BuildBranch branch)
+	{
+		IReadOnlyList<string> weaponIds = WeaponDefinitions.GetForBranch(branch);
+		if (weaponIds.Count == 0)
+		{
+			return;
+		}
+
+		string startingId = weaponIds[0];
+		ownedWeaponIds.Add(startingId);
+		if (WeaponDefinitions.All.TryGetValue(startingId, out WeaponDefinition? definition))
+		{
+			EquipWeapon(definition);
+		}
 	}
 
 	public bool HasCollectedTax(string villagerName)
@@ -672,6 +833,7 @@ public partial class Player : CharacterBody2D
 		{
 			attackSpeedMultiplier *= 1.25f;
 		}
+		attackSpeedMultiplier *= weaponAttackSpeedMultiplier;
 
 		attackTimer = basicCooldown / attackSpeedMultiplier;
 		Vector2 direction = (GetGlobalMousePosition() - GlobalPosition).Normalized();
@@ -684,7 +846,7 @@ public partial class Player : CharacterBody2D
 				break;
 			case BuildBranch.Scout:
 				bool closeHit = TryMeleeArc(direction, 34.0f, 0.72f, GetMeleeDamage(true) * 0.65f);
-				SpawnProjectile(direction, 0.0f, 280.0f, 1.2f, false, false, new Color(0.48f, 0.88f, 0.7f), true);
+				SpawnProjectile(direction, 0.0f, 280.0f, 1.2f, false, false, new Color(0.48f, 0.88f, 0.7f), weaponSlowOnHit);
 				if (closeHit)
 				{
 					weapon?.FlashHit();
@@ -902,7 +1064,11 @@ public partial class Player : CharacterBody2D
 			}
 
 			dashHitEnemies.Add(enemy);
-			enemy.TakeDamage(ApplyCritical(dashDamage, true), HasAbility("alchemic_assistance") && ChosenBranch == BuildBranch.Scout);
+			// The kite payoff: a target already slowed by your own darts eats extra damage
+			// from the dash finisher, on top of the ability's own damage multiplier.
+			float damage = enemy.IsScoutDebuffed ? dashDamage * DashSlowedTargetBonus : dashDamage;
+			bool poisons = weaponPoisonOnHit && HasAbility("alchemic_assistance") && ChosenBranch == BuildBranch.Scout;
+			enemy.TakeDamage(ApplyCritical(damage, true), poisons);
 			enemy.GlobalPosition += dashDirection * 10.0f;
 			weapon?.FlashHit();
 		}
@@ -916,6 +1082,7 @@ public partial class Player : CharacterBody2D
 
 	private bool TryMeleeArc(Vector2 direction, float radius, float arcWidth, float damage, float knockback = 0.0f)
 	{
+		float effectiveRadius = radius + weaponMeleeRangeBonus;
 		bool hitSomething = false;
 		foreach (Node node in GetTree().GetNodesInGroup("enemies"))
 		{
@@ -925,7 +1092,7 @@ public partial class Player : CharacterBody2D
 			}
 
 			Vector2 offset = enemy.GlobalPosition - GlobalPosition;
-			if (offset.Length() > radius)
+			if (offset.Length() > effectiveRadius)
 			{
 				continue;
 			}
@@ -936,7 +1103,12 @@ public partial class Player : CharacterBody2D
 			}
 
 			float finalDamage = ApplyCritical(damage, ChosenBranch == BuildBranch.Ranger ? false : true);
-			enemy.TakeDamage(finalDamage, HasAbility("alchemic_assistance") && ChosenBranch == BuildBranch.Scout);
+			bool poisons = weaponPoisonOnHit && HasAbility("alchemic_assistance") && ChosenBranch == BuildBranch.Scout;
+			enemy.TakeDamage(finalDamage, poisons);
+			if (weaponStunChance > 0.0f && GD.Randf() <= weaponStunChance)
+			{
+				enemy.ApplyStun(weaponStunDuration);
+			}
 			if (knockback > 0.0f)
 			{
 				enemy.GlobalPosition += offset.Normalized() * knockback;
@@ -959,7 +1131,7 @@ public partial class Player : CharacterBody2D
 		projectile.AppliesPoison = poison;
 		projectile.AppliesScoutDebuff = scoutDebuff;
 		projectile.ScoutSlowMultiplier = 0.6f;
-		projectile.ScoutPoisonTickDamage = HasAbility("alchemic_assistance") ? 2.0f : 1.0f;
+		projectile.ScoutPoisonTickDamage = weaponPoisonOnHit ? (HasAbility("alchemic_assistance") ? 2.0f : 1.0f) : 0.0f;
 		projectile.ScoutPoisonTickInterval = 4.0f;
 		projectile.ScoutDebuffDuration = HasAbility("alchemic_assistance") ? 10.0f : 8.0f;
 		projectile.Tint = color;
@@ -1014,7 +1186,7 @@ public partial class Player : CharacterBody2D
 		{
 			value *= 0.85f;
 		}
-		return value * GetLevelDamageMultiplier();
+		return value * GetLevelDamageMultiplier() * weaponDamageMultiplier;
 	}
 
 	private float GetRangedDamage(bool arrow)
@@ -1036,7 +1208,7 @@ public partial class Player : CharacterBody2D
 		{
 			value *= 1.10f;
 		}
-		return value * GetLevelDamageMultiplier();
+		return value * GetLevelDamageMultiplier() * weaponDamageMultiplier;
 	}
 
 	// Levels 1-3 already do their damage work through class multipliers and ability
@@ -1048,7 +1220,7 @@ public partial class Player : CharacterBody2D
 
 	private float ApplyCritical(float baseDamage, bool melee)
 	{
-		float critChance = BaseCritChance;
+		float critChance = BaseCritChance + weaponCritChanceBonus;
 		float critMultiplier = BaseCritMultiplier + (Level >= 3 ? 0.05f : 0.0f);
 
 		if (currentHealth <= maxHealth * 0.2f)
