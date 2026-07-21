@@ -281,7 +281,7 @@ horizontal_alignment = 1
 [node name="Merchant" type="Node2D" parent="Npcs"]
 position = Vector2(340, 260)
 script = ExtResource("8_interact")
-Kind = 4
+Kind = 5
 Radius = 40.0
 DisplayName = "Merchant Odo"
 PotionPrice = 8
@@ -305,7 +305,7 @@ horizontal_alignment = 1
 [node name="RoyalSteward" type="Node2D" parent="Npcs"]
 position = Vector2(536, 260)
 script = ExtResource("8_interact")
-Kind = 5
+Kind = 6
 Radius = 42.0
 DisplayName = "Royal Steward"
 Faction = 1

@@ -691,7 +691,7 @@ public partial class Player : CharacterBody2D
 				}
 				break;
 			default:
-				if (TryMeleeArc(direction, 42.0f, 1.1f, GetMeleeDamage(true)))
+				if (TryMeleeArc(direction, 63.0f, 1.1f, GetMeleeDamage(true)))
 				{
 					weapon?.FlashHit();
 				}
