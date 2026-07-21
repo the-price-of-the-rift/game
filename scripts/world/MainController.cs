@@ -14,6 +14,7 @@ public partial class MainController : Node2D
 	[Export] public NodePath HudPath { get; set; } = new NodePath();
 	[Export] public NodePath AbilityTreePath { get; set; } = new NodePath();
 	[Export] public NodePath DialogueUiPath { get; set; } = new NodePath();
+	[Export] public NodePath CheatPanelPath { get; set; } = new NodePath();
 	[Export] public NodePath WorldPromptLabelPath { get; set; } = new NodePath();
 	[Export] public NodePath WorldSlotPath { get; set; } = new NodePath();
 
@@ -21,6 +22,7 @@ public partial class MainController : Node2D
 	private HudController? hud;
 	private AbilityTreeUI? treeUi;
 	private DialogueUI? dialogueUi;
+	private CheatPanelUI? cheatPanel;
 	private Label? worldPrompt;
 	private Node2D? worldSlot;
 
@@ -31,7 +33,7 @@ public partial class MainController : Node2D
 	public int CurrentTier => currentTier;
 	public bool InRift => inRift;
 	public bool HouseSwapDone => houseSwapDone;
-	public bool UiBlocking => (treeUi?.Visible ?? false) || (dialogueUi?.Visible ?? false);
+	public bool UiBlocking => (treeUi?.Visible ?? false) || (dialogueUi?.Visible ?? false) || (cheatPanel?.Visible ?? false);
 
 	public override void _Ready()
 	{
@@ -39,6 +41,7 @@ public partial class MainController : Node2D
 		hud = GetNodeOrNull<HudController>(HudPath);
 		treeUi = GetNodeOrNull<AbilityTreeUI>(AbilityTreePath);
 		dialogueUi = GetNodeOrNull<DialogueUI>(DialogueUiPath);
+		cheatPanel = GetNodeOrNull<CheatPanelUI>(CheatPanelPath);
 		worldPrompt = GetNodeOrNull<Label>(WorldPromptLabelPath);
 		worldSlot = GetNodeOrNull<Node2D>(WorldSlotPath);
 
@@ -51,6 +54,7 @@ public partial class MainController : Node2D
 		hud?.Bind(player, this);
 		treeUi?.Bind(player);
 		dialogueUi?.Bind(player);
+		cheatPanel?.Bind(player, this);
 
 		SwapToVillage();
 	}
@@ -67,13 +71,20 @@ public partial class MainController : Node2D
 			treeUi?.Toggle();
 		}
 
+		if (Input.IsActionJustPressed("toggle_cheats"))
+		{
+			cheatPanel?.Toggle();
+		}
+
 		player.InputLocked = UiBlocking;
 
 		if (UiBlocking && worldPrompt != null)
 		{
 			worldPrompt.Text = (treeUi?.Visible ?? false)
 				? "Ability Tree open - click a node to unlock, press B to close."
-				: "Press [F] to leave the conversation.";
+				: (cheatPanel?.Visible ?? false)
+					? "Cheat Panel open - press ` to close."
+					: "Press [F] to leave the conversation.";
 		}
 	}
 
@@ -101,6 +112,30 @@ public partial class MainController : Node2D
 		}
 
 		CallDeferred(nameof(SwapToRift));
+	}
+
+	// Cheat-only: grants the exact rewards RiftController.OnEnemyKilled would have paid
+	// out for every enemy in the current tier's wave, then advances the tier and returns
+	// to the village - same net effect as actually clearing the rift.
+	public void CheatCompleteRift()
+	{
+		if (player == null)
+		{
+			return;
+		}
+
+		int tier = currentTier;
+		int enemyCount = 3 + tier;
+		for (int index = 0; index < enemyCount; index++)
+		{
+			bool elite = tier >= 3 && index == enemyCount - 1;
+			player.GainXp(8 + tier * 2);
+			player.GainMagicStones(1);
+			player.GainReputation(2 + (elite ? 3 : 0));
+		}
+
+		player.SetLastTreeMessage("Cheat: rift tier " + tier + " auto-completed.");
+		ReturnToVillage(true);
 	}
 
 	public void ReturnToVillage(bool cleared)

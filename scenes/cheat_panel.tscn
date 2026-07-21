@@ -1,0 +1,124 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/CheatPanelUI.cs" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cheat_button"]
+bg_color = Color(0.35, 0.35, 0.38, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.75, 0.75, 0.8, 1)
+
+[node name="CheatPanel" type="CanvasLayer"]
+script = ExtResource("1")
+StatusLabelPath = NodePath("Panel/StatusLabel")
+CompleteRiftButtonPath = NodePath("Panel/CompleteRiftButton")
+AddXpButtonPath = NodePath("Panel/AddXpButton")
+LevelUpButtonPath = NodePath("Panel/LevelUpButton")
+AddStonesButtonPath = NodePath("Panel/AddStonesButton")
+AddReputationButtonPath = NodePath("Panel/AddReputationButton")
+FullHealButtonPath = NodePath("Panel/FullHealButton")
+ImmortalityButtonPath = NodePath("Panel/ImmortalityButton")
+CloseButtonPath = NodePath("Panel/CloseButton")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 1
+color = Color(0.02, 0.02, 0.04, 0.82)
+
+[node name="Panel" type="ColorRect" parent="."]
+offset_left = 40.0
+offset_top = 20.0
+offset_right = 600.0
+offset_bottom = 250.0
+color = Color(0.05, 0.05, 0.08, 0.92)
+
+[node name="TitleLabel" type="Label" parent="Panel"]
+offset_left = 10.0
+offset_top = 6.0
+offset_right = 550.0
+offset_bottom = 22.0
+theme_override_font_sizes/font_size = 12
+text = "Cheat Panel"
+
+[node name="StatusLabel" type="Label" parent="Panel"]
+offset_left = 10.0
+offset_top = 24.0
+offset_right = 540.0
+offset_bottom = 68.0
+theme_override_font_sizes/font_size = 9
+autowrap_mode = 3
+
+[node name="CompleteRiftButton" type="Button" parent="Panel"]
+offset_left = 10.0
+offset_top = 76.0
+offset_right = 550.0
+offset_bottom = 102.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "Complete Next Rift"
+
+[node name="AddXpButton" type="Button" parent="Panel"]
+offset_left = 10.0
+offset_top = 110.0
+offset_right = 275.0
+offset_bottom = 136.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "+25 XP"
+
+[node name="LevelUpButton" type="Button" parent="Panel"]
+offset_left = 285.0
+offset_top = 110.0
+offset_right = 550.0
+offset_bottom = 136.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "Level Up"
+
+[node name="AddStonesButton" type="Button" parent="Panel"]
+offset_left = 10.0
+offset_top = 144.0
+offset_right = 275.0
+offset_bottom = 170.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "+5 Magic Stones"
+
+[node name="AddReputationButton" type="Button" parent="Panel"]
+offset_left = 285.0
+offset_top = 144.0
+offset_right = 550.0
+offset_bottom = 170.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "+10 Reputation"
+
+[node name="FullHealButton" type="Button" parent="Panel"]
+offset_left = 10.0
+offset_top = 178.0
+offset_right = 275.0
+offset_bottom = 204.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "Full Heal"
+
+[node name="ImmortalityButton" type="Button" parent="Panel"]
+offset_left = 285.0
+offset_top = 178.0
+offset_right = 550.0
+offset_bottom = 204.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "Immortality: OFF"
+
+[node name="CloseButton" type="Button" parent="Panel"]
+offset_left = 10.0
+offset_top = 212.0
+offset_right = 550.0
+offset_bottom = 238.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_cheat_button")
+theme_override_font_sizes/font_size = 10
+text = "Close"

@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/dialogue.tscn" id="5_dialogue"]
 [ext_resource type="PackedScene" uid="uid://bvillage0rift1" path="res://scenes/village.tscn" id="6_village"]
 [ext_resource type="PackedScene" uid="uid://brift0combat1" path="res://scenes/rift.tscn" id="7_rift"]
+[ext_resource type="PackedScene" path="res://scenes/cheat_panel.tscn" id="8_cheats"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -16,6 +17,7 @@ PlayerPath = NodePath("Player")
 HudPath = NodePath("Hud")
 AbilityTreePath = NodePath("AbilityTree")
 DialogueUiPath = NodePath("Dialogue")
+CheatPanelPath = NodePath("CheatPanel")
 WorldPromptLabelPath = NodePath("WorldPromptLabel")
 WorldSlotPath = NodePath("WorldSlot")
 
@@ -38,3 +40,5 @@ autowrap_mode = 3
 [node name="AbilityTree" parent="." instance=ExtResource("4_tree")]
 
 [node name="Dialogue" parent="." instance=ExtResource("5_dialogue")]
+
+[node name="CheatPanel" parent="." instance=ExtResource("8_cheats")]

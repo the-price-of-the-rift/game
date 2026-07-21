@@ -25,6 +25,7 @@ public partial class Player : CharacterBody2D
 	public float CurrentShield => currentShield;
 	public float MaxShield => maxShield;
 	public bool InputLocked { get; set; } = false;
+	public bool IsImmortal { get; set; } = false;
 	public string LastTreeMessage { get; private set; } = "Open the tree with B and pick a branch.";
 
 	private const float BaseMeleeDamage = 12.0f;
@@ -342,6 +343,26 @@ public partial class Player : CharacterBody2D
 		EmitSignal(SignalName.StatsChanged);
 	}
 
+	// Cheat-only: crosses the XP threshold for the next level via the normal GainXp path,
+	// so it triggers the same stat bumps and passive gate a real level-up would.
+	public void CheatForceLevelUp()
+	{
+		int target = Level switch
+		{
+			1 => 25,
+			2 => 60,
+			_ => -1,
+		};
+
+		if (target < 0)
+		{
+			SetLastTreeMessage("Already at max level.");
+			return;
+		}
+
+		GainXp(Mathf.Max(0, target - Xp));
+	}
+
 	public void GainMagicStones(int amount)
 	{
 		MagicStones += amount;
@@ -370,7 +391,7 @@ public partial class Player : CharacterBody2D
 
 	public void TakeDamage(float amount)
 	{
-		if (currentHealth <= 0.0f || invulnerabilityTimer > 0.0f)
+		if (IsImmortal || currentHealth <= 0.0f || invulnerabilityTimer > 0.0f)
 		{
 			return;
 		}
