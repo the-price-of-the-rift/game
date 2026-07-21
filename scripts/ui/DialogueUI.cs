@@ -14,7 +14,7 @@ public partial class DialogueUI : CanvasLayer
 
 	private Player? player;
 	private Label? nameLabel;
-	private Label? bodyLabel;
+	private RichTextLabel? bodyLabel;
 	private Button? learnButton;
 	private Button? leaveButton;
 	private string pendingAbilityId = "";
@@ -23,7 +23,7 @@ public partial class DialogueUI : CanvasLayer
 	{
 		Visible = false;
 		nameLabel = GetNodeOrNull<Label>(NameLabelPath);
-		bodyLabel = GetNodeOrNull<Label>(BodyLabelPath);
+		bodyLabel = GetNodeOrNull<RichTextLabel>(BodyLabelPath);
 		learnButton = GetNodeOrNull<Button>(LearnButtonPath);
 		leaveButton = GetNodeOrNull<Button>(LeaveButtonPath);
 
@@ -60,33 +60,37 @@ public partial class DialogueUI : CanvasLayer
 
 		if (standing == Standing.Hostile)
 		{
-			SetBody(HostileLine(npc.Faction));
+			SetBody(FormatSpeech(HostileLine(npc.Faction)));
 		}
 		else if (npc.IsTeacher && npc.Faction == Faction.Kings && standing == Standing.Friendly && npc.TeachBranch != BuildBranch.None)
 		{
 			string nextAbility = player.GetNextTeachableActive(npc.TeachBranch);
 			if (string.IsNullOrEmpty(nextAbility))
 			{
-				SetBody("I have nothing left to teach you.");
+				SetBody(FormatSpeech("I have nothing left to teach you."));
 			}
 			else if (AbilityDefinitions.All.TryGetValue(nextAbility, out AbilityDefinition? definition))
 			{
 				pendingAbilityId = nextAbility;
 				offerTeach = true;
-				SetBody("You have earned my trust. Let me teach you " + definition.DisplayName + ".\n" + definition.Description);
+				string speech = FormatSpeech("You have earned my trust. Let me teach you " + definition.DisplayName + ".\n" + definition.Description);
+				string outro = definition.IsBranchChoice && player.ChosenBranch == BuildBranch.None
+					? "\n\n[font_size=8][i]\"" + GetClassIntro(definition.Branch) + "\"[/i][/font_size]"
+					: "";
+				SetBody(speech + outro);
 			}
 			else
 			{
-				SetBody(string.IsNullOrEmpty(npc.FlavorText) ? "Well met." : npc.FlavorText);
+				SetBody(FormatSpeech(string.IsNullOrEmpty(npc.FlavorText) ? "Well met." : npc.FlavorText));
 			}
 		}
 		else if (npc.IsTeacher && npc.Faction == Faction.Kings && npc.TeachBranch != BuildBranch.None)
 		{
-			SetBody("Prove yourself to the crown first. Then I will teach you what I know.");
+			SetBody(FormatSpeech("Prove yourself to the crown first. Then I will teach you what I know."));
 		}
 		else
 		{
-			SetBody(string.IsNullOrEmpty(npc.FlavorText) ? "Safe travels, reeve." : npc.FlavorText);
+			SetBody(FormatSpeech(string.IsNullOrEmpty(npc.FlavorText) ? "Safe travels, reeve." : npc.FlavorText));
 		}
 
 		if (learnButton != null)
@@ -114,12 +118,12 @@ public partial class DialogueUI : CanvasLayer
 		{
 			if (AbilityDefinitions.All.TryGetValue(pendingAbilityId, out AbilityDefinition? definition))
 			{
-				SetBody("Learned " + definition.DisplayName + ". Use it with Q, E, or R.");
+				SetBody(FormatSpeech("Learned " + definition.DisplayName + ". Use it with Q, E, or R."));
 			}
 		}
 		else
 		{
-			SetBody(player.LastTreeMessage);
+			SetBody(FormatSpeech(player.LastTreeMessage));
 		}
 
 		if (learnButton != null)
@@ -135,6 +139,40 @@ public partial class DialogueUI : CanvasLayer
 		{
 			bodyLabel.Text = text;
 		}
+	}
+
+	// Prefixes each line with a dash so speech reads as the NPC talking, distinct from
+	// the unprefixed, smaller, italicized class-intro text appended after it.
+	private static string FormatSpeech(string text)
+	{
+		string[] lines = text.Split('\n');
+		for (int i = 0; i < lines.Length; i++)
+		{
+			lines[i] = "- " + lines[i];
+		}
+		return string.Join("\n", lines);
+	}
+
+	// Shown once, right before the player's first branch-choice active is taught, since
+	// learning it locks ChosenBranch permanently with no respec anywhere in the game.
+	private static string GetClassIntro(BuildBranch branch)
+	{
+		return branch switch
+		{
+			BuildBranch.Warrior =>
+				"Choose this path and you will carry a sword. The Warrior is a heavily armored " +
+				"melee fighter: high damage and defense, able to block incoming hits with a shield, " +
+				"but slow on their feet and poor at dodging or fighting at range.",
+			BuildBranch.Ranger =>
+				"Choose this path and you will carry a bow. The Ranger is a swift ranged fighter: " +
+				"the highest damage output and best mobility of the three, but fragile in melee and " +
+				"weak once the fight closes in.",
+			BuildBranch.Scout =>
+				"Choose this path and you will carry daggers and throwing darts. The Scout is a nimble " +
+				"hybrid, mixing quick melee strikes with ranged darts and excellent evasion, but with " +
+				"low resistance to damage.",
+			_ => "",
+		};
 	}
 
 	private static string HostileLine(Faction faction)

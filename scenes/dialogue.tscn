@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/DialogueUI.cs" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_gray"]
+bg_color = Color(0.35, 0.35, 0.38, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.75, 0.75, 0.8, 1)
 
 [node name="Dialogue" type="CanvasLayer"]
 script = ExtResource("1")
@@ -10,39 +18,43 @@ LearnButtonPath = NodePath("Panel/LearnButton")
 LeaveButtonPath = NodePath("Panel/LeaveButton")
 
 [node name="Panel" type="ColorRect" parent="."]
-offset_left = 96.0
-offset_top = 236.0
-offset_right = 544.0
-offset_bottom = 344.0
+offset_left = 0.0
+offset_top = 210.0
+offset_right = 640.0
+offset_bottom = 360.0
 color = Color(0.06, 0.08, 0.1, 0.9)
 
 [node name="NameLabel" type="Label" parent="Panel"]
 offset_left = 10.0
-offset_top = 8.0
-offset_right = 438.0
-offset_bottom = 24.0
+offset_top = 6.0
+offset_right = 630.0
+offset_bottom = 20.0
 theme_override_font_sizes/font_size = 11
 
-[node name="BodyLabel" type="Label" parent="Panel"]
+[node name="BodyLabel" type="RichTextLabel" parent="Panel"]
 offset_left = 10.0
-offset_top = 28.0
-offset_right = 438.0
-offset_bottom = 74.0
-theme_override_font_sizes/font_size = 10
+offset_top = 24.0
+offset_right = 630.0
+offset_bottom = 108.0
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+scroll_active = true
 autowrap_mode = 3
 
 [node name="LearnButton" type="Button" parent="Panel"]
 offset_left = 10.0
-offset_top = 78.0
+offset_top = 114.0
 offset_right = 110.0
-offset_bottom = 100.0
+offset_bottom = 136.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_gray")
 theme_override_font_sizes/font_size = 10
 text = "Learn"
 
 [node name="LeaveButton" type="Button" parent="Panel"]
 offset_left = 120.0
-offset_top = 78.0
+offset_top = 114.0
 offset_right = 220.0
-offset_bottom = 100.0
+offset_bottom = 136.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_gray")
 theme_override_font_sizes/font_size = 10
 text = "Leave"
