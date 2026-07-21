@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://dkp17m5xa4xu0" path="res://scripts/actors/Player.cs" id="2"]
 [ext_resource type="Script" uid="uid://c7v08jkjocyaq" path="res://scripts/actors/Weapon.cs" id="3"]
 [ext_resource type="PackedScene" uid="uid://0hhhi0k5o3mg" path="res://scenes/projectile.tscn" id="4"]
+[ext_resource type="Texture2D" uid="uid://d1e204q3n0svp" path="res://storage-assets/Weapons/Wood/Wood.png" id="5_qlg0r"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 12.0
@@ -27,28 +28,33 @@ texture = ExtResource("1")
 hframes = 4
 
 [node name="WeaponPivot" type="Node2D" parent="." unique_id=1414289016]
-z_index = 19
-position = Vector2(0, -20)
+position = Vector2(0, -7)
 
 [node name="Weapon" type="Node2D" parent="WeaponPivot" unique_id=20672597]
 script = ExtResource("3")
 WarriorVisualPath = NodePath("WarriorVisual")
 RangerVisualPath = NodePath("RangerVisual")
 ScoutVisualPath = NodePath("ScoutVisual")
-WarriorBladePath = NodePath("WarriorVisual/Blade")
-RangerBowArcPath = NodePath("RangerVisual/BowArc")
-ScoutDaggerPath = NodePath("ScoutVisual/Dagger")
 
 [node name="WarriorVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=603526110]
 position = Vector2(5, 0)
 
-[node name="Blade" type="Polygon2D" parent="WeaponPivot/Weapon/WarriorVisual" unique_id=100115883]
+[node name="BladeOld" type="Polygon2D" parent="WeaponPivot/Weapon/WarriorVisual" unique_id=100115883]
+visible = false
 color = Color(0.9, 0.9, 0.95, 1)
 polygon = PackedVector2Array(2, -3, 24, -2, 24, 2, 2, 3)
 
 [node name="Guard" type="Polygon2D" parent="WeaponPivot/Weapon/WarriorVisual" unique_id=1991987008]
 color = Color(0.63, 0.4, 0.18, 1)
 polygon = PackedVector2Array(0, -5, 5, -5, 5, 5, 0, 5)
+
+[node name="Blade" type="Sprite2D" parent="WeaponPivot/Weapon/WarriorVisual" unique_id=1306894316]
+position = Vector2(18, 0)
+rotation = 1.5707964
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("5_qlg0r")
+region_enabled = true
+region_rect = Rect2(0, 0, 14.931812, 47.587986)
 
 [node name="RangerVisual" type="Node2D" parent="WeaponPivot/Weapon" unique_id=1618065905]
 visible = false
