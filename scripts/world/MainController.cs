@@ -28,13 +28,21 @@ public partial class MainController : Node2D
 	private Label? worldPrompt;
 	private Node2D? worldSlot;
 
+	// The campaign is two rifts long: clear both to rescue Lina and win.
+	private const int MaxRifts = 2;
+
 	private int currentTier = 1;
 	private bool houseSwapDone = false;
 	private bool inRift = false;
+	private bool campaignComplete = false;
 
 	public int CurrentTier => currentTier;
+	public int MaxRiftCount => MaxRifts;
 	public bool InRift => inRift;
 	public bool HouseSwapDone => houseSwapDone;
+	public bool CampaignComplete => campaignComplete;
+	// Lina is present before the rift opens and again once she is rescued; gone in between.
+	public bool LinaPresent => !houseSwapDone || campaignComplete;
 	public bool UiBlocking => (treeUi?.Visible ?? false) || (dialogueUi?.Visible ?? false) || (cheatPanel?.Visible ?? false) || (shopUi?.Visible ?? false);
 
 	public override void _Ready()
@@ -117,6 +125,12 @@ public partial class MainController : Node2D
 			return;
 		}
 
+		if (campaignComplete)
+		{
+			player?.SetLastTreeMessage("The rift is sealed. Lina is safe. There is nothing left beyond it.");
+			return;
+		}
+
 		// First rift entry is the scripted collapse beat: mark it so the village
 		// reloads with broken houses from here on (applied idempotently on load).
 		if (!houseSwapDone)
@@ -156,7 +170,17 @@ public partial class MainController : Node2D
 	{
 		if (cleared)
 		{
-			currentTier += 1;
+			// The tier the player just finished. Clearing the last rift ends the campaign
+			// (Lina rescued) instead of advancing to a rift that does not exist.
+			if (currentTier >= MaxRifts)
+			{
+				campaignComplete = true;
+				player?.SetLastTreeMessage("You tear Lina from the collapsing rift and carry her home. The rift seals behind you. She is safe.");
+			}
+			else
+			{
+				currentTier += 1;
+			}
 		}
 
 		CallDeferred(nameof(SwapToVillage));

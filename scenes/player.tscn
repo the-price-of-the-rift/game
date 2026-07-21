@@ -28,7 +28,7 @@ hframes = 4
 
 [node name="WeaponPivot" type="Node2D" parent="." unique_id=1414289016]
 z_index = 19
-position = Vector2(0, -8)
+position = Vector2(0, -20)
 
 [node name="Weapon" type="Node2D" parent="WeaponPivot" unique_id=20672597]
 script = ExtResource("3")
