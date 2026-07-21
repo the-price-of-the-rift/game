@@ -14,6 +14,7 @@ public partial class VillageController : Node2D
 	private Player? player;
 	private MainController? main;
 	private DialogueUI? dialogueUi;
+	private ShopUI? shopUi;
 	private Node? housesRoot;
 
 	public override void _Ready()
@@ -23,11 +24,12 @@ public partial class VillageController : Node2D
 
 	// Called by Main right after AddChild, once the player is placed at PlayerSpawn and
 	// its projectile container is re-pointed. Applies the house swap if it already happened.
-	public void Init(Player boundPlayer, MainController mainController, DialogueUI boundDialogue)
+	public void Init(Player boundPlayer, MainController mainController, DialogueUI boundDialogue, ShopUI? boundShop)
 	{
 		player = boundPlayer;
 		main = mainController;
 		dialogueUi = boundDialogue;
+		shopUi = boundShop;
 
 		if (main.HouseSwapDone)
 		{
@@ -47,6 +49,15 @@ public partial class VillageController : Node2D
 			if (Input.IsActionJustPressed("interact"))
 			{
 				dialogueUi.Close();
+			}
+			return;
+		}
+
+		if (shopUi != null && shopUi.Visible)
+		{
+			if (Input.IsActionJustPressed("interact"))
+			{
+				shopUi.Close();
 			}
 			return;
 		}
@@ -132,6 +143,9 @@ public partial class VillageController : Node2D
 				break;
 			case InteractableKind.Npc:
 				dialogueUi?.Open(target);
+				break;
+			case InteractableKind.Shop:
+				shopUi?.Open(target.DisplayName);
 				break;
 		}
 	}

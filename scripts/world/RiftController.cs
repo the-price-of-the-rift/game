@@ -161,7 +161,7 @@ public partial class RiftController : Node2D
 		projectileEnemies.Remove(enemy);
 		acidEnemies.Remove(enemy);
 		livingEnemies.Remove(enemy);
-		player.GainXp(8 + currentTier * 2);
+		player.GainXp(BalanceCurves.GetXpReward(currentTier));
 		player.GainMagicStones(1);
 		player.GainReputation(2 + (enemy.IsElite ? 3 : 0));
 

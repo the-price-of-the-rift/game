@@ -8,6 +8,7 @@ public enum InteractableKind
 	Portal,
 	Station,
 	Npc,
+	Shop,
 }
 
 // A world object the player can trigger with the interact key.
@@ -45,6 +46,7 @@ public partial class Interactable : Node2D
 			InteractableKind.Portal => "[F] Enter the rift",
 			InteractableKind.Station => "[F] Use the " + DisplayName,
 			InteractableKind.Npc => "[F] Talk to " + DisplayName,
+			InteractableKind.Shop => "[F] Browse the " + DisplayName,
 			_ => "[F] Interact",
 		};
 	}

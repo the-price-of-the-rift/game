@@ -44,6 +44,14 @@ public partial class Player : CharacterBody2D
 	private const float DashDistance = 148.0f;
 	private const float DashHitRadius = 24.0f;
 
+	// Leveling is uncapped (see BalanceCurves): levels 2 and 3 still grant the designed
+	// reputation/HP bumps and gate the King's passive tiers, but every level past 3 grants
+	// no new passives - just a small generic HP + damage bump, so growth continues without
+	// inventing new content past the existing 3-tier ability tree.
+	private const float ExtraHealthPerLevelBeyond3 = 8.0f;
+	private const float ExtraDamagePercentPerLevelBeyond3 = 0.02f;
+	private const int ExtraReputationPerLevelBeyond3 = 5;
+
 	private readonly HashSet<string> unlockedAbilities = new();
 	private readonly Dictionary<string, float> cooldowns = new();
 	private readonly HashSet<Enemy> dashHitEnemies = new();
@@ -311,56 +319,59 @@ public partial class Player : CharacterBody2D
 		return "";
 	}
 
+	// Uncapped: keeps leveling as long as accumulated Xp crosses BalanceCurves' (doubling)
+	// threshold for the next level. Levels 2 and 3 still grant their designed reputation/HP
+	// bumps and gate the King's passive tiers; every level beyond 3 grants no new passives,
+	// just a small generic HP + damage bump (see the ExtraXPerLevelBeyond3 constants), so
+	// growth continues without inventing new ability-tree content.
 	public void GainXp(int amount)
 	{
 		Xp += amount;
 		bool leveled = false;
 
-		if (Level < 2 && Xp >= 25)
+		while (Xp >= BalanceCurves.GetXpRequiredForLevel(Level + 1))
 		{
-			Level = 2;
-			Reputation += 15;
-			maxHealth += 5.0f;
-			currentHealth += 5.0f;
+			Level += 1;
 			leveled = true;
-		}
 
-		if (Level < 3 && Xp >= 60)
-		{
-			Level = 3;
-			Reputation += 10;
-			maxHealth += 10.0f;
-			currentHealth += 10.0f;
-			leveled = true;
+			switch (Level)
+			{
+				case 2:
+					Reputation += 15;
+					maxHealth += 5.0f;
+					currentHealth += 5.0f;
+					break;
+				case 3:
+					Reputation += 10;
+					maxHealth += 10.0f;
+					currentHealth += 10.0f;
+					break;
+				default:
+					Reputation += ExtraReputationPerLevelBeyond3;
+					maxHealth += ExtraHealthPerLevelBeyond3;
+					currentHealth += ExtraHealthPerLevelBeyond3;
+					break;
+			}
 		}
 
 		if (leveled)
 		{
 			RefreshStats();
-			LastTreeMessage = "Reached level " + Level + ". New passive gate unlocked.";
+			LastTreeMessage = Level <= 3
+				? "Reached level " + Level + ". New passive gate unlocked."
+				: "Reached level " + Level + ". Stats improved.";
 		}
 
 		EmitSignal(SignalName.StatsChanged);
 	}
 
 	// Cheat-only: crosses the XP threshold for the next level via the normal GainXp path,
-	// so it triggers the same stat bumps and passive gate a real level-up would.
+	// so it triggers the same stat bumps (and, up to level 3, passive gate) a real
+	// level-up would. Uncapped, same as GainXp.
 	public void CheatForceLevelUp()
 	{
-		int target = Level switch
-		{
-			1 => 25,
-			2 => 60,
-			_ => -1,
-		};
-
-		if (target < 0)
-		{
-			SetLastTreeMessage("Already at max level.");
-			return;
-		}
-
-		GainXp(Mathf.Max(0, target - Xp));
+		int nextLevel = Level + 1;
+		GainXp(Mathf.Max(0, BalanceCurves.GetXpRequiredForLevel(nextLevel) - Xp));
 	}
 
 	public void GainMagicStones(int amount)
@@ -886,7 +897,7 @@ public partial class Player : CharacterBody2D
 		{
 			value *= 0.75f;
 		}
-		return value;
+		return value * GetLevelDamageMultiplier();
 	}
 
 	private float GetRangedDamage(bool arrow)
@@ -908,7 +919,14 @@ public partial class Player : CharacterBody2D
 		{
 			value *= 1.10f;
 		}
-		return value;
+		return value * GetLevelDamageMultiplier();
+	}
+
+	// Levels 1-3 already do their damage work through class multipliers and ability
+	// unlocks; this only kicks in past level 3, where leveling has nothing left to gate.
+	private float GetLevelDamageMultiplier()
+	{
+		return 1.0f + Mathf.Max(0, Level - 3) * ExtraDamagePercentPerLevelBeyond3;
 	}
 
 	private float ApplyCritical(float baseDamage, bool melee)
@@ -958,6 +976,10 @@ public partial class Player : CharacterBody2D
 		if (Level >= 3)
 		{
 			healthBonus += 10.0f;
+		}
+		if (Level > 3)
+		{
+			healthBonus += (Level - 3) * ExtraHealthPerLevelBeyond3;
 		}
 
 		maxHealth = RangerBaseHealth + healthBonus;

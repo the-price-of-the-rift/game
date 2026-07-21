@@ -15,6 +15,7 @@ public partial class MainController : Node2D
 	[Export] public NodePath AbilityTreePath { get; set; } = new NodePath();
 	[Export] public NodePath DialogueUiPath { get; set; } = new NodePath();
 	[Export] public NodePath CheatPanelPath { get; set; } = new NodePath();
+	[Export] public NodePath ShopUiPath { get; set; } = new NodePath();
 	[Export] public NodePath WorldPromptLabelPath { get; set; } = new NodePath();
 	[Export] public NodePath WorldSlotPath { get; set; } = new NodePath();
 
@@ -23,6 +24,7 @@ public partial class MainController : Node2D
 	private AbilityTreeUI? treeUi;
 	private DialogueUI? dialogueUi;
 	private CheatPanelUI? cheatPanel;
+	private ShopUI? shopUi;
 	private Label? worldPrompt;
 	private Node2D? worldSlot;
 
@@ -33,7 +35,7 @@ public partial class MainController : Node2D
 	public int CurrentTier => currentTier;
 	public bool InRift => inRift;
 	public bool HouseSwapDone => houseSwapDone;
-	public bool UiBlocking => (treeUi?.Visible ?? false) || (dialogueUi?.Visible ?? false) || (cheatPanel?.Visible ?? false);
+	public bool UiBlocking => (treeUi?.Visible ?? false) || (dialogueUi?.Visible ?? false) || (cheatPanel?.Visible ?? false) || (shopUi?.Visible ?? false);
 
 	public override void _Ready()
 	{
@@ -42,6 +44,7 @@ public partial class MainController : Node2D
 		treeUi = GetNodeOrNull<AbilityTreeUI>(AbilityTreePath);
 		dialogueUi = GetNodeOrNull<DialogueUI>(DialogueUiPath);
 		cheatPanel = GetNodeOrNull<CheatPanelUI>(CheatPanelPath);
+		shopUi = GetNodeOrNull<ShopUI>(ShopUiPath);
 		worldPrompt = GetNodeOrNull<Label>(WorldPromptLabelPath);
 		worldSlot = GetNodeOrNull<Node2D>(WorldSlotPath);
 
@@ -80,11 +83,22 @@ public partial class MainController : Node2D
 
 		if (UiBlocking && worldPrompt != null)
 		{
-			worldPrompt.Text = (treeUi?.Visible ?? false)
-				? "Ability Tree open - click a node to unlock, press B to close."
-				: (cheatPanel?.Visible ?? false)
-					? "Cheat Panel open - press ` to close."
-					: "Press [F] to leave the conversation.";
+			if (treeUi?.Visible ?? false)
+			{
+				worldPrompt.Text = "Ability Tree open - click a node to unlock, press B to close.";
+			}
+			else if (cheatPanel?.Visible ?? false)
+			{
+				worldPrompt.Text = "Cheat Panel open - press ` to close.";
+			}
+			else if (shopUi?.Visible ?? false)
+			{
+				worldPrompt.Text = "Shop open - press [F] to close.";
+			}
+			else
+			{
+				worldPrompt.Text = "Press [F] to leave the conversation.";
+			}
 		}
 	}
 
@@ -129,7 +143,7 @@ public partial class MainController : Node2D
 		for (int index = 0; index < enemyCount; index++)
 		{
 			bool elite = tier >= 3 && index == enemyCount - 1;
-			player.GainXp(8 + tier * 2);
+			player.GainXp(BalanceCurves.GetXpReward(tier));
 			player.GainMagicStones(1);
 			player.GainReputation(2 + (elite ? 3 : 0));
 		}
@@ -199,7 +213,7 @@ public partial class MainController : Node2D
 
 		if (root is VillageController village && player != null && dialogueUi != null)
 		{
-			village.Init(player, this, dialogueUi);
+			village.Init(player, this, dialogueUi, shopUi);
 		}
 	}
 

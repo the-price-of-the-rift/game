@@ -136,6 +136,26 @@ theme_override_font_sizes/font_size = 10
 text = "Bonfire"
 horizontal_alignment = 1
 
+[node name="Shop" type="Node2D" parent="Stations"]
+position = Vector2(360, 330)
+script = ExtResource("8_interact")
+Kind = 4
+Radius = 40.0
+DisplayName = "shop"
+
+[node name="Body" type="Polygon2D" parent="Stations/Shop"]
+color = Color(0.55, 0.45, 0.2, 1)
+polygon = PackedVector2Array(-14, -10, 14, -10, 14, 10, -14, 10)
+
+[node name="Label" type="Label" parent="Stations/Shop"]
+offset_left = -40.0
+offset_top = -30.0
+offset_right = 40.0
+offset_bottom = -14.0
+theme_override_font_sizes/font_size = 10
+text = "Shop"
+horizontal_alignment = 1
+
 [node name="Npcs" type="Node2D" parent="." unique_id=1012915813]
 
 [node name="Mara" type="Node2D" parent="Npcs" unique_id=342989094]
