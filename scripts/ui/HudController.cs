@@ -56,8 +56,9 @@ public partial class HudController : CanvasLayer
 			statsLabel.Text =
 				"HP " + player.CurrentHealth.ToString("0") + "/" + player.MaxHealth.ToString("0") +
 				"  Shield " + player.CurrentShield.ToString("0") + "/" + player.MaxShield.ToString("0") +
-				"\nLevel " + player.Level + "  XP " + player.Xp + "  Rep " + player.Reputation + "  Stones " + player.MagicStones + "  Coin " + player.Money +
-				"\nBuild " + player.GetBuildName() + "  Rift Tier " + world.CurrentTier + (world.InRift ? " (in rift)" : " (village)") +
+				"\nLevel " + player.Level + "  XP " + player.Xp + "  Rep " + player.Reputation + "  Stones " + player.MagicStones +
+				"\nCoin " + player.Money + "  Potions " + player.Potions + " (press 1)" +
+				"\nBuild " + player.GetBuildName() + "  Rift " + world.CurrentTier + "/" + world.MaxRiftCount + (world.InRift ? " (in rift)" : " (village)") +
 				"\nVillagers: " + Factions.GetStanding(Faction.Villagers, player.Reputation) +
 				"  King's Faction: " + Factions.GetStanding(Faction.Kings, player.Reputation);
 		}

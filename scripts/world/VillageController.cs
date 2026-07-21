@@ -35,6 +35,36 @@ public partial class VillageController : Node2D
 		{
 			ApplyHouseSwap();
 		}
+
+		ApplyLinaPhase();
+	}
+
+	// Lina stands in the village before the rift opens and again once she is rescued;
+	// while she is lost inside the rift her node is hidden (and skipped by interaction,
+	// which already ignores invisible interactables).
+	private void ApplyLinaPhase()
+	{
+		if (main == null)
+		{
+			return;
+		}
+
+		foreach (Node node in GetTree().GetNodesInGroup("interactables"))
+		{
+			if (node is not Interactable interactable || !interactable.IsLina)
+			{
+				continue;
+			}
+
+			interactable.Visible = main.LinaPresent;
+
+			if (main.CampaignComplete)
+			{
+				interactable.FlavorText = "You pulled me out of that place. I do not have the words, reeve. Whatever they call you now - to me you are the one who came back.";
+				interactable.HostileText = interactable.FlavorText;
+				interactable.FriendlyText = interactable.FlavorText;
+			}
+		}
 	}
 
 	public override void _Process(double delta)
@@ -142,6 +172,8 @@ public partial class VillageController : Node2D
 				}
 				break;
 			case InteractableKind.Npc:
+			case InteractableKind.Merchant:
+			case InteractableKind.TaxOfficer:
 				dialogueUi?.Open(target);
 				break;
 			case InteractableKind.Shop:

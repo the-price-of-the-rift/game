@@ -9,6 +9,8 @@ public enum InteractableKind
 	Station,
 	Npc,
 	Shop,
+	Merchant,
+	TaxOfficer,
 }
 
 // A world object the player can trigger with the interact key.
@@ -34,6 +36,21 @@ public partial class Interactable : Node2D
 	// next unlearned active in this branch whose prerequisites are met.
 	[Export] public BuildBranch TeachBranch { get; set; } = BuildBranch.None;
 
+	// Lina, the one villager who trusts the reeve. Her node is shown/hidden by phase
+	// (present before the rift, gone while she is lost, back once rescued).
+	[Export] public bool IsLina { get; set; } = false;
+
+	// Taxable villager (Npc only): the reeve can collect a one-time tax of coins.
+	[Export] public bool GivesTax { get; set; } = false;
+	[Export] public int TaxAmount { get; set; } = 10;
+
+	// Merchant only: how many coins one HP potion costs.
+	[Export] public int PotionPrice { get; set; } = 8;
+
+	// Reputation-tiered NPC flavor. When a line is empty it falls back to FlavorText.
+	[Export(PropertyHint.MultilineText)] public string HostileText { get; set; } = "";
+	[Export(PropertyHint.MultilineText)] public string FriendlyText { get; set; } = "";
+
 	public override void _Ready()
 	{
 		AddToGroup("interactables");
@@ -48,6 +65,8 @@ public partial class Interactable : Node2D
 			InteractableKind.Station => "[F] Use the " + DisplayName,
 			InteractableKind.Npc => "[F] Talk to " + DisplayName,
 			InteractableKind.Shop => "[F] Browse the " + DisplayName,
+			InteractableKind.Merchant => "[F] Trade with " + DisplayName,
+			InteractableKind.TaxOfficer => "[F] Report to " + DisplayName,
 			_ => "[F] Interact",
 		};
 	}

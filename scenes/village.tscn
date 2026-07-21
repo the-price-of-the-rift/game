@@ -158,25 +158,28 @@ horizontal_alignment = 1
 
 [node name="Npcs" type="Node2D" parent="." unique_id=1012915813]
 
-[node name="Mara" type="Node2D" parent="Npcs" unique_id=342989094]
+[node name="Lina" type="Node2D" parent="Npcs" unique_id=342989094]
 position = Vector2(150, 100)
 script = ExtResource("8_interact")
 Kind = 3
 Radius = 40.0
-DisplayName = "Mara"
-FlavorText = "You came back. I knew you were not like the others they warn us about."
+DisplayName = "Lina"
+IsLina = true
+FlavorText = "You came back. I knew you were not like the others they warn us about. Be careful out there, reeve."
+HostileText = "They all say you are cruel. I want to believe them wrong. Please, prove they are."
+FriendlyText = "The whole village fears you, yet you keep coming back for us. I do not know why I trust you - but I do."
 
-[node name="Body" type="Polygon2D" parent="Npcs/Mara" unique_id=392203948]
+[node name="Body" type="Polygon2D" parent="Npcs/Lina" unique_id=392203948]
 color = Color(0.85, 0.7, 0.55, 1)
 polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
 
-[node name="Label" type="Label" parent="Npcs/Mara" unique_id=1805313430]
+[node name="Label" type="Label" parent="Npcs/Lina" unique_id=1805313430]
 offset_left = -40.0
 offset_top = -32.0
 offset_right = 40.0
 offset_bottom = -16.0
 theme_override_font_sizes/font_size = 10
-text = "Mara"
+text = "Lina"
 horizontal_alignment = 1
 
 [node name="Blacksmith" type="Node2D" parent="Npcs" unique_id=673865680]
@@ -251,6 +254,7 @@ theme_override_font_sizes/font_size = 10
 text = "Ragged Hann"
 horizontal_alignment = 1
 
+
 [node name="Weller" type="Node2D" parent="Npcs"]
 position = Vector2(280, 200)
 script = ExtResource("8_interact")
@@ -272,6 +276,102 @@ offset_right = 40.0
 offset_bottom = -16.0
 theme_override_font_sizes/font_size = 10
 text = "Weller"
+horizontal_alignment = 1
+
+[node name="Merchant" type="Node2D" parent="Npcs"]
+position = Vector2(340, 260)
+script = ExtResource("8_interact")
+Kind = 4
+Radius = 40.0
+DisplayName = "Merchant Odo"
+PotionPrice = 8
+FlavorText = "Potions, reeve? A body needs its health where you are going. Eight coin apiece."
+HostileText = "I will still take your coin, reeve, though I like it no more than the rest do. Eight a potion."
+FriendlyText = "Always good to see a paying customer. HP potions, eight coin - and stay alive out there."
+
+[node name="Body" type="Polygon2D" parent="Npcs/Merchant"]
+color = Color(0.4, 0.55, 0.4, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/Merchant"]
+offset_left = -52.0
+offset_top = -32.0
+offset_right = 52.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Merchant Odo"
+horizontal_alignment = 1
+
+[node name="RoyalSteward" type="Node2D" parent="Npcs"]
+position = Vector2(536, 260)
+script = ExtResource("8_interact")
+Kind = 5
+Radius = 42.0
+DisplayName = "Royal Steward"
+Faction = 1
+FlavorText = "The crown expects its due. Bring me the taxes you collect and I will note your loyalty."
+
+[node name="Body" type="Polygon2D" parent="Npcs/RoyalSteward"]
+color = Color(0.75, 0.65, 0.25, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/RoyalSteward"]
+offset_left = -52.0
+offset_top = -32.0
+offset_right = 52.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Royal Steward"
+horizontal_alignment = 1
+
+[node name="OldToma" type="Node2D" parent="Npcs"]
+position = Vector2(360, 110)
+script = ExtResource("8_interact")
+Kind = 3
+Radius = 40.0
+DisplayName = "Old Toma"
+GivesTax = true
+TaxAmount = 12
+FlavorText = "You again. Take your coin and go - we have little enough as it is."
+HostileText = "Vulture. You bleed us dry while the crown grows fat. Take it and be cursed."
+FriendlyText = "You have been fair with us, reeve, fairer than most. Here is what I owe, freely given."
+
+[node name="Body" type="Polygon2D" parent="Npcs/OldToma"]
+color = Color(0.5, 0.45, 0.4, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/OldToma"]
+offset_left = -40.0
+offset_top = -32.0
+offset_right = 40.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Old Toma"
+horizontal_alignment = 1
+
+[node name="FarmerBewick" type="Node2D" parent="Npcs"]
+position = Vector2(560, 130)
+script = ExtResource("8_interact")
+Kind = 3
+Radius = 40.0
+DisplayName = "Farmer Bewick"
+GivesTax = true
+TaxAmount = 10
+FlavorText = "The harvest was thin, but the King does not care for that. Here."
+HostileText = "You take the bread from my children's mouths. I hope the rift takes you next."
+FriendlyText = "Word is you have been protecting us from that rift. For that, I pay gladly."
+
+[node name="Body" type="Polygon2D" parent="Npcs/FarmerBewick"]
+color = Color(0.55, 0.5, 0.35, 1)
+polygon = PackedVector2Array(-7, -14, 7, -14, 7, 14, -7, 14)
+
+[node name="Label" type="Label" parent="Npcs/FarmerBewick"]
+offset_left = -52.0
+offset_top = -32.0
+offset_right = 52.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 10
+text = "Farmer Bewick"
 horizontal_alignment = 1
 
 [node name="Houses" type="Node2D" parent="." unique_id=330636391]

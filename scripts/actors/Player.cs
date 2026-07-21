@@ -21,6 +21,7 @@ public partial class Player : CharacterBody2D
 	public int Reputation { get; private set; } = 12;
 	public int MagicStones { get; private set; } = 3;
 	public int Money { get; private set; } = 0;
+	public int Potions { get; private set; } = 0;
 
 	// Base price: 1 magic stone = 5 money, chaining the anchor doc's "1 stone = 1
 	// HP-equivalent" and "1 HP = 5 money" ratios. Selling is irreversible - no buy-back.
@@ -40,7 +41,7 @@ public partial class Player : CharacterBody2D
 	private const float BaseRangedDamage = 10.0f;
 	private const float RangerBaseHealth = 50.0f;
 	private const float WarriorHealthBonus = 20.0f;
-	private const float ScoutHealthPenalty = 10.0f;
+	private const float ScoutHealthPenalty = 6.0f;
 	private const float RangerBaseMoveSpeed = 108.0f;
 	private const float WarriorMovePenalty = 18.0f;
 	private const float ScoutMoveBonus = 22.0f;
@@ -51,6 +52,7 @@ public partial class Player : CharacterBody2D
 	private const float DashDuration = 0.18f;
 	private const float DashDistance = 148.0f;
 	private const float DashHitRadius = 24.0f;
+	private const float PotionHealAmount = 30.0f;
 
 	// Leveling is uncapped (see BalanceCurves): levels 2 and 3 still grant the designed
 	// reputation/HP bumps and gate the King's passive tiers, but every level past 3 grants
@@ -63,6 +65,9 @@ public partial class Player : CharacterBody2D
 	private readonly HashSet<string> unlockedAbilities = new();
 	private readonly Dictionary<string, float> cooldowns = new();
 	private readonly HashSet<Enemy> dashHitEnemies = new();
+	// Names of villagers whose one-time tax has already been collected (persists across
+	// village <-> rift trips, since the village scene is re-instantiated each time).
+	private readonly HashSet<string> collectedTaxes = new();
 
 	private Sprite2D? sprite;
 	private Weapon? weapon;
@@ -104,6 +109,10 @@ public partial class Player : CharacterBody2D
 		{
 			HandleAttack();
 			HandleActiveAbilities();
+			if (Input.IsActionJustPressed("use_potion"))
+			{
+				UsePotion();
+			}
 		}
 
 		RechargeShield((float)delta);
@@ -432,6 +441,67 @@ public partial class Player : CharacterBody2D
 		Reputation += amount;
 		LastTreeMessage = "Village reputation is now " + Reputation + ".";
 		EmitSignal(SignalName.StatsChanged);
+	}
+
+	// Returns false (and does nothing) when the player cannot afford the amount.
+	public bool SpendMoney(int amount)
+	{
+		if (amount < 0 || Money < amount)
+		{
+			return false;
+		}
+
+		Money -= amount;
+		EmitSignal(SignalName.StatsChanged);
+		return true;
+	}
+
+	public void AddPotions(int amount)
+	{
+		Potions += amount;
+		EmitSignal(SignalName.StatsChanged);
+	}
+
+	public bool HasCollectedTax(string villagerName)
+	{
+		return collectedTaxes.Contains(villagerName);
+	}
+
+	// Collects a villager's one-time tax into money. Returns false if already collected.
+	public bool CollectTax(string villagerName, int amount)
+	{
+		if (collectedTaxes.Contains(villagerName))
+		{
+			return false;
+		}
+
+		collectedTaxes.Add(villagerName);
+		GainMoney(amount);
+		return true;
+	}
+
+	// Consumes one potion for a flat heal. No-op (returns false) when empty or already full.
+	public bool UsePotion()
+	{
+		if (Potions <= 0)
+		{
+			LastTreeMessage = "No HP potions left. Buy some from the merchant.";
+			EmitSignal(SignalName.StatsChanged);
+			return false;
+		}
+
+		if (currentHealth >= maxHealth)
+		{
+			LastTreeMessage = "Already at full health.";
+			EmitSignal(SignalName.StatsChanged);
+			return false;
+		}
+
+		Potions -= 1;
+		currentHealth = Mathf.Min(maxHealth, currentHealth + PotionHealAmount);
+		LastTreeMessage = "Drank an HP potion (+" + PotionHealAmount.ToString("0") + " HP).";
+		EmitSignal(SignalName.StatsChanged);
+		return true;
 	}
 
 	public void SetLastTreeMessage(string message)
@@ -942,7 +1012,7 @@ public partial class Player : CharacterBody2D
 		}
 		if (basicAttack && ChosenBranch == BuildBranch.Scout)
 		{
-			value *= 0.75f;
+			value *= 0.85f;
 		}
 		return value * GetLevelDamageMultiplier();
 	}
